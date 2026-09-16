@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بوابة حوكمة ومتابعة تعديات المشاريع الجارية - NWC</title>
+  
+  <!-- Leaflet OpenStreetMap CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Google Fonts Cairo -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- SheetJS & Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      --primary: #153E4B;
+      --secondary: #168A89;
+      --bg-page: #FBF8F0;
+      --bg-phrase: #E2EFEB;
+      --bg-card: #EEF3EF;
+      --border-line: #D8E2DF;
+      --alert-red: #991B1B;
+      --success-green: #166534;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    body {
+      background-color: var(--bg-page);
+      color: var(--primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Top Navbar */
+    .navbar {
+      background-color: var(--primary);
+      color: #FFFFFF;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(21, 62, 75, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .nav-brand h1 {
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-brand p {
+      font-size: 12px;
+      color: #A2C8C6;
+    }
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background-color: var(--secondary);
+      color: #FFFFFF;
+    }
+    .btn-primary:hover {
+      background-color: #116867;
+    }
+    .btn-secondary {
+      background-color: var(--bg-phrase);
+      color: var(--primary);
+      border-color: var(--border-line);
+    }
+    .btn-secondary:hover {
+      background-color: #D3E6E0;
+    }
+    .btn-outline {
+      background-color: transparent;
+      color: #FFFFFF;
+      border-color: #A2C8C6;
+    }
+    .btn-outline:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .btn-danger {
+      background-color: #FEE2E2;
+      color: var(--alert-red);
+      border-color: #FCA5A5;
+    }
+    .btn-danger:hover {
+      background-color: #FCA5A5;
+      color: #7F1D1D;
+    }
+    .btn-success {
+      background-color: #DCFCE7;
+      color: var(--success-green);
+      border-color: #86EFAC;
+    }
+    .btn-success:hover {
+      background-color: #86EFAC;
+    }
+    
+    /* Upload Banner */
+    .upload-strip {
+      background-color: var(--bg-phrase);
+      border-bottom: 1px solid var(--border-line);
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .upload-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* KPI Banner */
+    .kpi-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      padding: 16px 24px;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .kpi-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      border-top: 3px solid var(--secondary);
+    }
+    .kpi-card.alert {
+      border-top-color: var(--primary);
+    }
+    .kpi-card.success {
+      border-top-color: var(--success-green);
+    }
+    .kpi-num {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+    .kpi-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-top: 2px;
+    }
+    .kpi-desc {
+      font-size: 10.5px;
+      color: #666;
+    }
+
+    /* Layout Grid */
+    .main-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 24px 20px;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 16px;
+      flex: 1;
+      width: 100%;
+    }
+    
+    .panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-line);
+    }
+    .panel-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    /* OpenStreetMap */
+    #map {
+      height: 420px;
+      border-radius: 6px;
+      border: 1px solid var(--border-line);
+      z-index: 10;
+    }
+
+    /* Filter Chips */
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 700;
+      background-color: var(--bg-phrase);
+      color: var(--primary);
+      cursor: pointer;
+      border: 1px solid var(--border-line);
+      transition: all 0.2s;
+    }
+    .filter-chip.active {
+      background-color: var(--secondary);
+      color: #FFFFFF;
+      border-color: var(--secondary);
+    }
+    
+    /* Encroachment Cards List */
+    .cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      max-height: 420px;
+      padding-right: 2px;
+    }
+    .enc-card {
+      background-color: #FFFFFF;
+      border: 1px solid var(--border-line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-right: 4px solid var(--secondary);
+    }
+    .enc-card:hover {
+      transform: translateX(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    .enc-card.resolved {
+      border-right-color: var(--success-green);
+      opacity: 0.75;
+    }
+    .enc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .enc-badge {
+      background-color: var(--bg-phrase);
+      color: var(--primary);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 800;
+    }
+    .enc-status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background-color: var(--bg-phrase);
+      color: var(--secondary);
+    }
+    .enc-status.green {
+      background-color: #DCFCE7;
+      color: var(--success-green);
+    }
+    .enc-proj {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 3px;
+    }
+    .enc-meta {
+      font-size: 10.5px;
+      color: #555;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .enc-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      border-top: 1px dashed var(--border-line);
+      padding-top: 5px;
+    }
+    
+    /* Charts Grid Section */
+    .charts-section {
+      grid-column: span 2;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 16px;
+    }
+    .chart-box {
+      height: 180px;
+      position: relative;
+    }
+
+    /* Full Table Section */
+    .table-section {
+      grid-column: span 2;
+    }
+    .table-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      padding: 6px 12px;
+      border: 1px solid var(--border-line);
+      border-radius: 6px;
+      font-size: 11.5px;
+      min-width: 240px;
+      background: #FFFFFF;
+      color: var(--primary);
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      background-color: #FFFFFF;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .data-table th {
+      background-color: var(--primary);
+      color: #FFFFFF;
+      padding: 8px 10px;
+      text-align: right;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border-line);
+      color: var(--primary);
+    }
+    .data-table tr:hover {
+      background-color: var(--bg-phrase);
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(21, 62, 75, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background: #FFFFFF;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+      border: 1px solid var(--border-line);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .modal-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 12px;
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 6px;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 3px;
+      color: var(--primary);
+    }
+    .form-control {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--border-line);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--primary);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 14px;
+      border-top: 1px solid var(--border-line);
+      padding-top: 10px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: var(--primary);
+      color: #FFFFFF;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 10000;
+      border-left: 4px solid var(--secondary);
+    }
+    .toast.show {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+
+    /* Print Styles: PRINT ONLY PENDING TABLE */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .printable-pending-section, .printable-pending-section * {
+        visibility: visible;
+      }
+      .printable-pending-section {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: transparent !important;
+        padding: 8mm;
+      }
+      .print-header {
+        display: block !important;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #153E4B;
+        padding-bottom: 8px;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .data-table {
+        font-size: 9.5px;
+        border: 1px solid #D8E2DF;
+      }
+      .data-table th {
+        background-color: #153E4B !important;
+        color: #FFFFFF !important;
+        -webkit-print-color-adjust: exact;
+      }
+      .data-table td {
+        border: 1px solid #D8E2DF;
+        padding: 5px 8px;
+      }
+    }
+    .print-header {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="navbar no-print">
+    <div class="nav-brand">
+      <h1>🏢 شركة المياه الوطنية (NWC) - القطاع الأوسط</h1>
+      <p>بوابة حوكمة ومتابعة تعديات المشاريع الجارية (مدينة الرياض والمحافظات)</p>
+    </div>
+    <div class="nav-actions">
+      <button onclick="openAddModal()" class="btn btn-secondary">➕ إضافة بلاغ جديد</button>
+      <a href="infographic_report.html" target="_blank" class="btn btn-outline">📊 الإنفوجرافيك التنفيذي (A4)</a>
+      <button onclick="exportToExcel()" class="btn btn-secondary">📥 تصدير إكسيل</button>
+      <button onclick="window.print()" class="btn btn-primary">🖨️ طباعة جدول البلاغات (PDF)</button>
+    </div>
+  </nav>
+
+  <!-- Upload Strip -->
+  <div class="upload-strip no-print">
+    <div class="upload-box">
+      <strong>📂 استيراد وتحليل ملف إكسيل جديد:</strong>
+      <div class="file-input-wrapper">
+        <button class="btn btn-primary">📎 اختر ملف XLSX</button>
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls" onchange="handleExcelUpload(event)">
+      </div>
+      <span id="uploadFileName" style="font-size:11px; color:#666;">لم يتم رفع ملف جديد (تُعرض البيانات المعتمدة)</span>
+    </div>
+    <div>
+      <button onclick="resetToDefaults()" class="btn btn-danger" style="font-size:11px; padding:4px 10px;">🔄 استعادة البيانات الافتراضية (17 بلاغاً)</button>
+    </div>
+  </div>
+
+  <!-- KPI Banner -->
+  <div class="kpi-section no-print">
+    <div class="kpi-card">
+      <div class="kpi-num" id="kpiTotal">17</div>
+      <div class="kpi-lbl">إجمالي البلاغات النشطة</div>
+      <div class="kpi-desc" id="kpiSubLoc">13 الرياض + 4 المحافظات</div>
+    </div>
+    <div class="kpi-card alert">
+      <div class="kpi-num" id="kpiContractor">16</div>
+      <div class="kpi-lbl">تحت معالجة المقاول</div>
+      <div class="kpi-desc">إلزام بالمعالجة الميدانية الفورية</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num" id="kpiReview">1</div>
+      <div class="kpi-lbl">بانتظار اعتماد الجهة</div>
+      <div class="kpi-desc">متابعة إخلاء الطرف وإغلاق البلاغ</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-num" id="kpiResolved">0</div>
+      <div class="kpi-lbl">تمت المعالجة والإغلاق</div>
+      <div class="kpi-desc">بلاغات منجزة خلال الجلسة</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num" id="kpiAvgDays">148</div>
+      <div class="kpi-lbl">متوسط أيام التأخير</div>
+      <div class="kpi-desc">حساب آلي بحسب تاريخ الاستخراج</div>
+    </div>
+  </div>
+
+  <!-- Main Portal Layout -->
+  <div class="main-container no-print">
+    
+    <!-- OpenStreetMap Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">🗺️ خريطة OpenStreetMap التفاعلية للتعديات</div>
+        <div class="filter-group">
+          <div class="filter-chip active" onclick="filterData('all', this)">الكل (<span id="countAll">17</span>)</div>
+          <div class="filter-chip" onclick="filterData('riyadh', this)">الرياض (<span id="countRiyadh">13</span>)</div>
+          <div class="filter-chip" onclick="filterData('govs', this)">المحافظات (<span id="countGovs">4</span>)</div>
+          <div class="filter-chip" onclick="filterData('resolved', this)">المعالجة (<span id="countResolved">0</span>)</div>
+        </div>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <!-- Encroachment Cards Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">📋 بطاقات البلاغات قيد الإجراء</div>
+        <span id="activeCountBadge" style="font-size:11px; font-weight:700; color:var(--secondary);">17 بلاغاً</span>
+      </div>
+      <div class="cards-list" id="cardsContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">⏳ التوزيع الزمني للبلاغات المعلقة</div>
+        </div>
+        <div class="chart-box">
+          <canvas id="ageDoughnutChart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">👔 البلاغات المعلقة حسب مدير البرنامج</div>
+        </div>
+        <div class="chart-box">
+          <canvas id="pmBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Printable Table Section -->
+  <div class="printable-pending-section main-container table-section" style="max-width:1440px; margin:0 auto 30px;">
+    
+    <div class="print-header">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h2 style="font-size:17px; color:#153E4B; font-weight:900;">🏢 شركة المياه الوطنية (NWC) - القطاع الأوسط</h2>
+          <h3 style="font-size:12px; color:#168A89; font-weight:700; margin-top:2px;">جدول البلاغات المعلقة المعتمدة للمشاريع الجارية (مدينة الرياض والمحافظات)</h3>
+        </div>
+        <div style="text-align:left; font-size:10px; color:#153E4B;">
+          <div>تاريخ الاستخراج: 16 سبتمبر 2026</div>
+          <div id="printTableCount">إجمالي البلاغات: 17 بلاغاً معتمداً</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header no-print">
+        <div class="panel-title">📑 جدول حوكمة البلاغات التفصيلي (معد للطباعة والتصدير)</div>
+        <div class="table-tools">
+          <input type="text" id="tableSearch" class="search-input" placeholder="🔍 بحث برقم البلاغ، المشروع، المقاول، الحي..." oninput="handleTableSearch(event)">
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>رقم البلاغ</th>
+              <th>اسم المشروع</th>
+              <th>المقاول المنفذ</th>
+              <th>المدينة / المحافظة</th>
+              <th>الحي / الشارع</th>
+              <th>تاريخ البلاغ</th>
+              <th>أيام التأخير</th>
+              <th>حالة البلاغ</th>
+              <th>مدير البرنامج</th>
+              <th class="no-print">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="print-header" style="margin-top:12px; border-top:1px solid #D8E2DF; border-bottom:none; padding-top:6px; font-size:9.5px; display:flex; justify-content:space-between; color:#168A89;">
+      <div>نظام الحوكمة والربط المكاني المعتمد 100% | شركة المياه الوطنية</div>
+      <div><strong>إعداد: عبدالله الزغيبي - التعديات والحوادث</strong></div>
+    </div>
+
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal-overlay" id="encModal">
+    <div class="modal-content">
+      <div class="modal-title" id="modalTitle">➕ إضافة بلاغ تعدي جديد</div>
+      <form id="encForm" onsubmit="handleSaveEncroachment(event)">
+        <input type="hidden" id="formEditIndex" value="-1">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">رقم بلاغ التعدي *</label>
+            <input type="number" id="formRepId" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاريخ البلاغ *</label>
+            <input type="date" id="formDate" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">اسم المشروع *</label>
+          <input type="text" id="formProjName" class="form-control" required list="projectOptions">
+          <datalist id="projectOptions">
+            <!-- Populated by JS -->
+          </datalist>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">المقاول المنفذ *</label>
+            <input type="text" id="formContractor" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">مدير البرنامج NWC *</label>
+            <select id="formPM" class="form-control" required>
+              <option value="م. عبدالله الأسود">م. عبدالله الأسود</option>
+              <option value="م. سعيد الحارث">م. سعيد الحارث</option>
+              <option value="م. تركي الاسمري">م. تركي الاسمري</option>
+              <option value="م. امجد الفالح">م. امجد الفالح</option>
+              <option value="م. عسكر لسوم">م. عسكر لسوم</option>
+              <option value="م. عبدالله العنزي">م. عبدالله العنزي</option>
+              <option value="م. شاكر الحقباني">م. شاكر الحقباني</option>
+              <option value="م. علي القحطاني">م. علي القحطاني</option>
+              <option value="م. سفر العتيبي">م. سفر العتيبي</option>
+              <option value="م. علي الشهري">م. علي الشهري</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">المدينة / المحافظة *</label>
+            <input type="text" id="formCity" class="form-control" required value="مدينة الرياض">
+          </div>
+          <div class="form-group">
+            <label class="form-label">الحي / الموقع *</label>
+            <input type="text" id="formDistrict" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">خط العرض (Latitude)</label>
+            <input type="number" step="any" id="formLat" class="form-control" placeholder="مثال: 24.7136">
+          </div>
+          <div class="form-group">
+            <label class="form-label">خط الطول (Longitude)</label>
+            <input type="number" step="any" id="formLng" class="form-control" placeholder="مثال: 46.6753">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">حالة البلاغ *</label>
+          <select id="formStatus" class="form-control" required>
+            <option value="تحت معالجة المقاول">تحت معالجة المقاول</option>
+            <option value="بانتظار اعتماد الجهة المتعدية">بانتظار اعتماد الجهة المتعدية</option>
+            <option value="تمت المعالجة">تمت المعالجة</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">وصف التعدي / الإجراء المطلوب</label>
+          <textarea id="formDesc" class="form-control" rows="2" placeholder="ملاحظات الحفر والسفلتة أو الإجراء المطلوب..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" onclick="closeModal()" class="btn btn-secondary">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ البلاغ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toastMsg">تم التحديث بنجاح!</div>
+
+  <script>
+    // Initial Seed Data
+    const defaultData = [{"id": 60, "operation_number": "24/23/2/12/0028/1", "name": "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", "location": "شامل – مدينة الرياض", "po": "201230700", "contractor": "مجموعة سعد علي العيسى للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "المتفرقات", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. عبدالله الأسود", "project_manager_nwc": "علي بن طالع", "supervisor": "محمد السيد تهامي", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "الياسمين", "الشارع": "القادسية", "خط_الطول": 46.6666, "خط_العرض": 24.8166, "رقم_بلاغ_التعدي": 3598, "تاريخ_البلاغ": "2026-03-17", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع شمال الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفريات وصرف صحي بدون استكمال إجراءات إخلاء الطرف"}, {"id": 60, "operation_number": "24/23/2/12/0028/1", "name": "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", "location": "شامل – مدينة الرياض", "po": "201230700", "contractor": "مجموعة سعد علي العيسى للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "المتفرقات", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. عبدالله الأسود", "project_manager_nwc": "علي بن طالع", "supervisor": "محمد السيد تهامي", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "شبرا", "الشارع": "الطريق الدائري الجنوبي", "خط_الطول": 46.7001, "خط_العرض": 24.5833, "رقم_بلاغ_التعدي": 4475, "تاريخ_البلاغ": "2026-05-07", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - وكالة التشغيل والصيانة", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفريات وصرف صحي بدون استكمال إجراءات إخلاء الطرف"}, {"id": 60, "operation_number": "24/23/2/12/0028/1", "name": "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", "location": "شامل – مدينة الرياض", "po": "201230700", "contractor": "مجموعة سعد علي العيسى للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "المتفرقات", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. عبدالله الأسود", "project_manager_nwc": "علي بن طالع", "supervisor": "محمد السيد تهامي", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "القادسية", "الشارع": "شارع وادي الدواسر", "خط_الطول": 46.8122, "خط_العرض": 24.8144, "رقم_بلاغ_التعدي": 15537, "تاريخ_البلاغ": "2026-06-24", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع شرق الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفريات وصرف صحي بدون استكمال إجراءات إخلاء الطرف"}, {"id": 60, "operation_number": "24/23/2/12/0028/1", "name": "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", "location": "شامل – مدينة الرياض", "po": "201230700", "contractor": "مجموعة سعد علي العيسى للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "المتفرقات", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. عبدالله الأسود", "project_manager_nwc": "علي بن طالع", "supervisor": "محمد السيد تهامي", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "النظيم", "الشارع": "شارع بدون اسم", "خط_الطول": 46.8777, "خط_العرض": 24.8211, "رقم_بلاغ_التعدي": 17192, "تاريخ_البلاغ": "2026-08-08", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع شرق الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفريات وصرف صحي بدون استكمال إجراءات إخلاء الطرف"}, {"id": 7, "operation_number": "24/23/2/02/0041/1", "name": "تنفيذ شبكة صرف صحي بأجزاء من احياء الحزم ونمار المرحلة الثالثة", "location": "حي الحزم و حي نمار", "po": "201220412", "contractor": "شركة الخط الذهبي للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "جنوب الرياض - صرف", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. تركي الاسمري", "project_manager_nwc": "سلطان بن حمود", "supervisor": "وليد حسين فرج", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "الحزم", "الشارع": "الغمار", "خط_الطول": 46.6631, "خط_العرض": 24.5422, "رقم_بلاغ_التعدي": 14679, "تاريخ_البلاغ": "2026-05-14", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - وكالة التشغيل والصيانة", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات صرف صحي"}, {"id": 2, "operation_number": "24/23/2/02/0053/1", "name": "عقد تنفيذ شبكات صرف صحي بحي الحائر", "location": "حي الحائر", "po": "201230101", "contractor": "شركة المسار الحديث المحدودة", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "جنوب الرياض - صرف", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. تركي الاسمري", "project_manager_nwc": "عبدالرحمن الشهري", "supervisor": "وليد حسين فرج", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "الحائر", "الشارع": "علي بن عبدالغفار", "خط_الطول": 46.8201, "خط_العرض": 24.4121, "رقم_بلاغ_التعدي": 3150, "تاريخ_البلاغ": "2026-02-15", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - وكالة التشغيل والصيانة", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات صرف صحي"}, {"id": 2, "operation_number": "24/23/2/02/0053/1", "name": "عقد تنفيذ شبكات صرف صحي بحي الحائر", "location": "حي الحائر", "po": "201230101", "contractor": "شركة المسار الحديث المحدودة", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "جنوب الرياض - صرف", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. تركي الاسمري", "project_manager_nwc": "عبدالرحمن الشهري", "supervisor": "وليد حسين فرج", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "الحائر", "الشارع": "ابن شاكر", "خط_الطول": 46.8188, "خط_العرض": 24.4155, "رقم_بلاغ_التعدي": 3263, "تاريخ_البلاغ": "2026-02-25", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - وكالة التشغيل والصيانة", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات صرف صحي"}, {"id": 20, "operation_number": "24/23/2/02/0057/1", "name": "عقد تنفيذ شبكة صرف صحى بحى المعيزلية - المرحلة الأولى", "location": "حي المعيزلية", "po": "201230222", "contractor": "شركة نظم البيئة للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "شمال الرياض - صرف", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. عسكر لسوم", "project_manager_nwc": "سعد القحطاني", "supervisor": "أشرف عبد الغفار", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "المعيزلية", "الشارع": "الشلال", "خط_الطول": 46.8411, "خط_العرض": 24.7911, "رقم_بلاغ_التعدي": 15063, "تاريخ_البلاغ": "2026-06-08", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع شرق الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات صرف صحي"}, {"id": 12, "operation_number": "24/23/2/02/0027/1", "name": "عقد تنفيذ شبكات الصرف الصحي بأجزاء من أحياء القدس والملك عبد الله", "location": "حي الملك عبدالله و حي القدس", "po": "201230155", "contractor": "شركة ربوة التعمير(راكو) للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "شمال الرياض - صرف", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. عسكر لسوم", "project_manager_nwc": "سعد القحطاني", "supervisor": "أشرف عبد الغفار", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "القدس", "الشارع": "نفجان", "خط_الطول": 46.7588, "خط_العرض": 24.7611, "رقم_بلاغ_التعدي": 15440, "تاريخ_البلاغ": "2026-06-22", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع وسط الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات صرف صحي"}, {"id": 58, "operation_number": "24/23/2/02/0049/1", "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", "location": "حي العوالي", "po": "201230888", "contractor": "شركة نظم البيئة للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "غرب الرياض - صرف", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. امجد الفالح", "project_manager_nwc": "خالد العتيبي", "supervisor": "محمد أنور رشوان", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "العوالي", "الشارع": "علي بن شيبان", "خط_الطول": 46.5622, "خط_العرض": 24.5511, "رقم_بلاغ_التعدي": 16579, "تاريخ_البلاغ": "2026-07-20", "حالة_البلاغ": "بانتظار اعتماد الجهة المتعدية", "جهة_التوجيه_والتنبيه": "تنبيه لمسؤول التعديات بالمشاريع", "الإجراء_المطلوب": "إلزام المقاول بإضافة نموذج مراجعة المعالجة لدى إدارة الامتثال بـ NWC", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع جنوب الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات صرف صحي"}, {"id": 58, "operation_number": "24/23/2/02/0049/1", "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", "location": "حي العوالي", "po": "201230888", "contractor": "شركة نظم البيئة للمقاولات", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "غرب الرياض - صرف", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. امجد الفالح", "project_manager_nwc": "خالد العتيبي", "supervisor": "محمد أنور رشوان", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "العوالي", "الشارع": "علي بن شيبان", "خط_الطول": 46.5611, "خط_العرض": 24.5533, "رقم_بلاغ_التعدي": 17783, "تاريخ_البلاغ": "2026-08-23", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع جنوب الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات صرف صحي"}, {"id": 57, "operation_number": "24/23/2/02/0048/1", "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي (مرحلة أولى)", "location": "حي العوالي", "po": "201230777", "contractor": "شركة الأعمال المدنية المحدودة", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "غرب الرياض - صرف", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. امجد الفالح", "project_manager_nwc": "خالد العتيبي", "supervisor": "محمد أنور رشوان", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "العوالي", "الشارع": "نجم الدين الأيوبي", "خط_الطول": 46.5588, "خط_العرض": 24.5611, "رقم_بلاغ_التعدي": 17882, "تاريخ_البلاغ": "2026-08-24", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع جنوب الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات صرف صحي"}, {"id": 23, "operation_number": "24/23/2/01/0014/1", "name": "عقد تنفيذ شبكات المياه بحي المهدية (عقد رقم 3)بمدينة الرياض", "location": "حي المهدية", "po": "201220999", "contractor": "شركة الدايل العالمية المحدودة", "consultant": "مكتب الياردة للاستشارات الهندسية", "status": "جاري", "sub_program": "غرب الرياض - مياه", "executive_manager": "عبدالله بن ظافر الدوسري", "program_manager_nwc": "م. عبدالله العنزي", "project_manager_nwc": "فهد الدوسري", "supervisor": "الصديق علي الحاج", "المدينة": "مدينة الرياض", "المحافظة": "مدينة الرياض", "الحي": "المهدية", "الشارع": "الدهناء", "خط_الطول": 46.5122, "خط_العرض": 24.6433, "رقم_بلاغ_التعدي": 3369, "تاريخ_البلاغ": "2026-03-03", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز", "الجهة_المالكة": "أمانة منطقة الرياض - قطاع غرب الرياض", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "أعمال حفر وتمديد شبكات مياه"}, {"id": 112, "operation_number": "01/23/2/11/0023/1", "name": "عقد استكمال مشاريع المياه بمحافظتي شقراء ومرات (المرحلة الاولي)", "location": "مرات و محافظة شقراء", "po": "801240029", "contractor": "شركة ضيف الله العتيبي للمقاولات", "consultant": "مكتب الياردة للإستشارات الهندسية", "status": "جاري", "sub_program": "المحافظات الغربية", "executive_manager": "رامي الحسني", "program_manager_nwc": "م. سعيد الحارث", "project_manager_nwc": "م. احمد البارقي", "supervisor": "محمود عبده", "المدينة": "شقراء", "المحافظة": "محافظة شقراء", "الحي": "الرحاب", "الشارع": "غير مسمى 326", "خط_الطول": 45.2775, "خط_العرض": 25.2388, "رقم_بلاغ_التعدي": 806, "تاريخ_البلاغ": "2025-08-20", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بمراجعة الشركة السعودية للكهرباء لإستكمال الإجراءات ومعالجة الموقع", "الجهة_المالكة": "الشركة السعودية للكهرباء", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "تضرر شبكة الكهرباء أثناء تنفيذ أعمال استكمال شبكات المياه بمحافظة شقراء"}, {"id": 114, "operation_number": "01/23/2/02/0037/1", "name": "عقد تنفيذ شبكات الصرف الصحي بمدينة شقراء ( المرحلة السابعة )", "location": "محافظة شقراء", "po": "801240191", "contractor": "مؤسسة أضواء رتاج للمقاولات", "consultant": "مكتب الياردة للإستشارات الهندسية", "status": "جاري", "sub_program": "المحافظات الغربية", "executive_manager": "رامي الحسني", "program_manager_nwc": "م. سعيد الحارث", "project_manager_nwc": "م. احمد البارقي", "supervisor": "محمود عبده", "المدينة": "شقراء", "المحافظة": "محافظة شقراء", "الحي": "الياسمين", "الشارع": "شارع عدي بن حاتم", "خط_الطول": 45.2915, "خط_العرض": 25.2212, "رقم_بلاغ_التعدي": 883, "تاريخ_البلاغ": "2025-08-25", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بمراجعة الشركة السعودية للكهرباء وإرفاق المستندات الداعمة لإغلاق البلاغ", "الجهة_المالكة": "الشركة السعودية للكهرباء", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "تضرر كابل كهربائي أثناء أعمال حفر شبكات الصرف الصحي بمدينة شقراء"}, {"id": 117, "operation_number": "01/23/2/01/0050/1", "name": "عقد تنفيذ و استكمال مشاريع المياه بمحافظة القويعية", "location": "محافظة القويعية", "po": "801240360", "contractor": "شركة ماكسون للمقاولات", "consultant": "مكتب الياردة للإستشارات الهندسية", "status": "جاري", "sub_program": "المحافظات الغربية", "executive_manager": "رامي الحسني", "program_manager_nwc": "م. سعيد الحارث", "project_manager_nwc": "م. احمد البارقي", "supervisor": "محمود عبده", "المدينة": "الرويضة", "المحافظة": "محافظة القويعية", "الحي": "حي الفلاح", "الشارع": "شارع عتبة بن أسيد", "خط_الطول": 44.7998, "خط_العرض": 23.7765, "رقم_بلاغ_التعدي": 1809, "تاريخ_البلاغ": "2025-11-20", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بمراجعة الشركة السعودية للكهرباء لإصلاح كيبل جهد متوسط 33 ك ف", "الجهة_المالكة": "الشركة السعودية للكهرباء", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "تضرر كيبل جهد متوسط 33 ك ف أثناء أعمال تنفيذ مشاريع المياه بمركز الرويضة"}, {"id": 107, "operation_number": "01/23/2/01/0014/1", "name": "عقد استكمال مشاريع المياه بمدينة الدوادمي ومراكز البجادية ونفي", "location": "البجادية و نفي و محافظة الدوادمي", "po": "801230300", "contractor": "شركة مشروعات المياه والطاقة للمقاولات", "consultant": "مكتب الياردة للإستشارات الهندسية", "status": "جاري", "sub_program": "المحافظات الغربية", "executive_manager": "رامي الحسني", "program_manager_nwc": "م. سعيد الحارث", "project_manager_nwc": "نواف الرشيدي", "supervisor": "أحمد بخيت", "المدينة": "الدوادمي", "المحافظة": "محافظة الدوادمي", "الحي": "الخالدية", "الشارع": "طريق الملك سلمان", "خط_الطول": 44.4002, "خط_العرض": 24.5205, "رقم_بلاغ_التعدي": 17844, "تاريخ_البلاغ": "2026-08-24", "حالة_البلاغ": "تحت معالجة المقاول", "جهة_التوجيه_والتنبيه": "تنبيه لمدير البرنامج", "الإجراء_المطلوب": "إلزام المقاول بمراجعة بلدية الدوادمي واستكمال المعالجة الميدانية", "الجهة_المالكة": "بلدية الدوادمي", "الجهة_المتعدية": "شركة المياه الوطنية", "اعتماد_المركز": "مركز مشاريع البنية التحتية بمنطقة الرياض (RIPC)", "وصف_التعدي": "ملاحظات حفر وسفلتة على مسار خط المياه بمدينة الدوادمي"}];
+    const projectsCatalog = [{"id": 60, "name": "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", "contractor": "مجموعة سعد علي العيسى للمقاولات", "scope": "شامل – مدينة الرياض", "pm": "م. عبدالله الأسود", "sub": "المتفرقات"}, {"id": 7, "name": "تنفيذ شبكة صرف صحي بأجزاء من احياء الحزم ونمار المرحلة الثالثة", "contractor": "شركة الخط الذهبي للمقاولات", "scope": "حي الحزم و حي نمار", "pm": "م. تركي الاسمري", "sub": "جنوب الرياض - صرف"}, {"id": 2, "name": "عقد تنفيذ شبكات صرف صحي بحي الحائر", "contractor": "شركة المسار الحديث المحدودة", "scope": "حي الحائر", "pm": "م. تركي الاسمري", "sub": "جنوب الرياض - صرف"}, {"id": 20, "name": "عقد تنفيذ شبكة صرف صحى بحى المعيزلية - المرحلة الأولى", "contractor": "شركة نظم البيئة للمقاولات", "scope": "حي المعيزلية", "pm": "م. عسكر لسوم", "sub": "شمال الرياض - صرف"}, {"id": 12, "name": "عقد تنفيذ شبكات الصرف الصحي بأجزاء من أحياء القدس والملك عبد الله", "contractor": "شركة ربوة التعمير(راكو) للمقاولات", "scope": "حي الملك عبدالله و حي القدس", "pm": "م. عسكر لسوم", "sub": "شمال الرياض - صرف"}, {"id": 58, "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", "contractor": "شركة نظم البيئة للمقاولات", "scope": "حي العوالي", "pm": "م. امجد الفالح", "sub": "غرب الرياض - صرف"}, {"id": 57, "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي (مرحلة أولى)", "contractor": "شركة الأعمال المدنية المحدودة", "scope": "حي العوالي", "pm": "م. امجد الفالح", "sub": "غرب الرياض - صرف"}, {"id": 23, "name": "عقد تنفيذ شبكات المياه بحي المهدية (عقد رقم 3)بمدينة الرياض", "contractor": "شركة الدايل العالمية المحدودة", "scope": "حي المهدية", "pm": "م. عبدالله العنزي", "sub": "غرب الرياض - مياه"}, {"id": 112, "name": "عقد استكمال مشاريع المياه بمحافظتي شقراء ومرات (المرحلة الاولي)", "contractor": "شركة ضيف الله العتيبي للمقاولات", "scope": "محافظة شقراء ومرات", "pm": "م. سعيد الحارث", "sub": "المحافظات الغربية"}, {"id": 114, "name": "عقد تنفيذ شبكات الصرف الصحي بمدينة شقراء ( المرحلة السابعة )", "contractor": "مؤسسة أضواء رتاج للمقاولات", "scope": "محافظة شقراء", "pm": "م. سعيد الحارث", "sub": "المحافظات الغربية"}, {"id": 117, "name": "عقد تنفيذ و استكمال مشاريع المياه بمحافظة القويعية", "contractor": "شركة ماكسون للمقاولات", "scope": "محافظة القويعية", "pm": "م. سعيد الحارث", "sub": "المحافظات الغربية"}, {"id": 107, "name": "عقد استكمال مشاريع المياه بمدينة الدوادمي ومراكز البجادية ونفي", "contractor": "شركة مشروعات المياه والطاقة للمقاولات", "scope": "محافظة الدوادمي", "pm": "م. سعيد الحارث", "sub": "المحافظات الغربية"}, {"id": 95, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة الخرج (المرحلة السابعة)", "contractor": "شركة الخريف لتقنية المياه والطاقة", "scope": "محافظة الخرج", "pm": "م. شاكر الحقباني", "sub": "المحافظات الجنوبية"}, {"id": 96, "name": "عقد تنفيذ مشروع صرف صحي بحوطة بني تميم (المرحلة الثالثة )", "contractor": "شركة السبق العربي للتجارة والمقاولات", "scope": "محافظة حوطة بني تميم", "pm": "م. شاكر الحقباني", "sub": "المحافظات الجنوبية"}, {"id": 97, "name": "عقد تنفيذ شبكات الصرف الصحي بحوطة بني تميم و الخرج (المرحلة الثانية)", "contractor": "شركة السبق العربي للتجارة والمقاولات", "scope": "محافظة الخرج وحوطة بني تميم", "pm": "م. شاكر الحقباني", "sub": "المحافظات الجنوبية"}, {"id": 99, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة الخرج", "contractor": "شركة مرامر للمقاولات", "scope": "محافظة الخرج", "pm": "م. شاكر الحقباني", "sub": "المحافظات الجنوبية"}, {"id": 113, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة المزاحمية (المرحلة الثانية )", "contractor": "شركة السبق العربي للتجارة والمقاولات", "scope": "محافظة المزاحمية", "pm": "م. سعيد الحارث", "sub": "المحافظات الغربية"}, {"id": 104, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة ضرماء (المرحلة الثانية)", "contractor": "شركة مسرة الوسطى للمقاولات", "scope": "محافظة ضرماء", "pm": "م. سعيد الحارث", "sub": "المحافظات الغربية"}, {"id": 80, "name": "عقد تنفيذ خطوط نقل المياه بمراكز وقرى محافظة المجمعة (المرحلة الثانية)", "contractor": "شركة مشروعات المياه والطاقة للمقاولات", "scope": "محافظة المجمعة", "pm": "م. علي القحطاني", "sub": "المحافظات الشمالية"}, {"id": 83, "name": "عقد تنفيذ شبكات الصرف الصحي بمدينة الزلفي ( المرحلة السادسة )", "contractor": "شركة بلر العربية للتجارة والمقاولات", "scope": "محافظة الزلفي", "pm": "م. علي القحطاني", "sub": "المحافظات الشمالية"}];
+
+    // Current State
+    let currentData = [];
+    let activeFilter = 'all';
+    let searchQuery = '';
+    let map = null;
+    let markers = [];
+    let ageChart = null;
+    let pmChart = null;
+
+    const baseCalculationDate = new Date('2026-09-16');
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStoredData();
+      initOpenStreetMap();
+      initCharts();
+      populateProjectDatalist();
+      renderAll();
+    });
+
+    function loadStoredData() {
+      const stored = localStorage.getItem('nwc_encroachments_data');
+      if (stored) {
+        try {
+          currentData = JSON.parse(stored);
+        } catch(e) {
+          currentData = JSON.parse(JSON.stringify(defaultData));
+        }
+      } else {
+        currentData = JSON.parse(JSON.stringify(defaultData));
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem('nwc_encroachments_data', JSON.stringify(currentData));
+    }
+
+    function resetToDefaults() {
+      if (confirm('هل أنت متأكد من استعادة البلاغات المعتمدة الافتراضية (17 بلاغاً)؟ سيتم إلغاء التعديلات غير المحفوظة.')) {
+        currentData = JSON.parse(JSON.stringify(defaultData));
+        saveData();
+        document.getElementById('uploadFileName').innerText = 'تمت استعادة البيانات الافتراضية (17 بلاغاً)';
+        renderAll();
+        showToast('تمت استعادة البيانات الافتراضية بنجاح!');
+      }
+    }
+
+    // OpenStreetMap Initialization
+    function initOpenStreetMap() {
+      map = L.map('map').setView([24.7136, 46.6753], 8);
+      
+      // Standard OSM Tile Layer (Free & Open Source)
+      const osmStandard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // Add Layer Control
+      const osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap HOT'
+      });
+      
+      L.control.layers({
+        "خريطة OpenStreetMap قياسية": osmStandard,
+        "خريطة تضاريس إنسانية": osmHot
+      }).addTo(map);
+    }
+
+    function populateProjectDatalist() {
+      const dl = document.getElementById('projectOptions');
+      dl.innerHTML = '';
+      projectsCatalog.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.innerText = `${p.contractor} (${p.pm})`;
+        dl.appendChild(opt);
+      });
+    }
+
+    // Filter Logic
+    function getFilteredData() {
+      return currentData.filter(item => {
+        // Filter by Tab
+        let matchTab = true;
+        if (activeFilter === 'riyadh') {
+          matchTab = (item.المدينة === 'مدينة الرياض') && item.حالة_البلاغ !== 'تمت المعالجة';
+        } else if (activeFilter === 'govs') {
+          matchTab = (item.المدينة !== 'مدينة الرياض') && item.حالة_البلاغ !== 'تمت المعالجة';
+        } else if (activeFilter === 'resolved') {
+          matchTab = item.حالة_البلاغ === 'تمت المعالجة';
+        } else if (activeFilter === 'all') {
+          matchTab = item.حالة_البلاغ !== 'تمت المعالجة';
+        }
+
+        // Filter by Search Query
+        let matchSearch = true;
+        if (searchQuery.trim() !== '') {
+          const q = searchQuery.toLowerCase();
+          const targetStr = `${item.رقم_بلاغ_التعدي} ${item.name} ${item.contractor} ${item.المدينة} ${item.الحي} ${item.program_manager_nwc} ${item.حالة_البلاغ}`.toLowerCase();
+          matchSearch = targetStr.includes(q);
+        }
+
+        return matchTab && matchSearch;
+      });
+    }
+
+    // Render Everything
+    function renderAll() {
+      const filtered = getFilteredData();
+      updateKPIs();
+      renderMapMarkers(filtered);
+      renderCards(filtered);
+      renderTable(filtered);
+      updateCharts();
+    }
+
+    function updateKPIs() {
+      const pendingItems = currentData.filter(i => i.حالة_البلاغ !== 'تمت المعالجة');
+      const underContractor = currentData.filter(i => i.حالة_البلاغ === 'تحت معالجة المقاول');
+      const underReview = currentData.filter(i => i.حالة_البلاغ === 'بانتظار اعتماد الجهة المتعدية');
+      const resolved = currentData.filter(i => i.حالة_البلاغ === 'تمت المعالجة');
+
+      const riyadhCount = pendingItems.filter(i => i.المدينة === 'مدينة الرياض').length;
+      const govsCount = pendingItems.filter(i => i.المدينة !== 'مدينة الرياض').length;
+
+      document.getElementById('kpiTotal').innerText = pendingItems.length;
+      document.getElementById('kpiSubLoc').innerText = `${riyadhCount} الرياض + ${govsCount} المحافظات`;
+      document.getElementById('kpiContractor').innerText = underContractor.length;
+      document.getElementById('kpiReview').innerText = underReview.length;
+      document.getElementById('kpiResolved').innerText = resolved.length;
+
+      document.getElementById('countAll').innerText = pendingItems.length;
+      document.getElementById('countRiyadh').innerText = riyadhCount;
+      document.getElementById('countGovs').innerText = govsCount;
+      document.getElementById('countResolved').innerText = resolved.length;
+      document.getElementById('activeCountBadge').innerText = `${pendingItems.length} بلاغاً معتمداً`;
+      document.getElementById('printTableCount').innerText = `إجمالي البلاغات: ${pendingItems.length} بلاغاً معتمداً`;
+
+      // Average Days
+      if (pendingItems.length > 0) {
+        let totalDays = 0;
+        pendingItems.forEach(i => {
+          const bDate = new Date(i.تاريخ_البلاغ);
+          const days = Math.max(0, Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24)));
+          totalDays += days;
+        });
+        document.getElementById('kpiAvgDays').innerText = Math.round(totalDays / pendingItems.length);
+      } else {
+        document.getElementById('kpiAvgDays').innerText = '0';
+      }
+    }
+
+    function renderMapMarkers(data) {
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      data.forEach(item => {
+        if (item.خط_العرض && item.خط_الطول) {
+          const isResolved = (item.حالة_البلاغ === 'تمت المعالجة');
+          const bDate = new Date(item.تاريخ_البلاغ);
+          const diffDays = Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24));
+
+          const marker = L.marker([item.خط_العرض, item.خط_الطول]).addTo(map);
+          marker.bindPopup(`
+            <div style="font-family:'Cairo'; direction:rtl; text-align:right; font-size:11.5px; min-width:200px;">
+              <strong style="color:#153E4B; font-size:13px;">بلاغ #${item.رقم_بلاغ_التعدي}</strong><br>
+              <span style="color:#168A89; font-weight:700;">${item.name}</span><br>
+              <strong>المقاول:</strong> ${item.contractor}<br>
+              <strong>الموقع:</strong> ${item.المدينة} - ${item.الحي}<br>
+              <strong>الحالة:</strong> ${item.حالة_البلاغ}<br>
+              <strong>أيام التأخير:</strong> ${diffDays} يوم<br>
+              <div style="margin-top:6px; display:flex; gap:4px;">
+                ${!isResolved ? `<button onclick="markResolved(${item.رقم_بلاغ_التعدي})" style="background:#168A89; color:#fff; border:none; padding:2px 8px; border-radius:4px; font-size:10px; cursor:pointer;">✅ تم الحل</button>` : ''}
+                <button onclick="editEncroachment(${item.رقم_بلاغ_التعدي})" style="background:#153E4B; color:#fff; border:none; padding:2px 8px; border-radius:4px; font-size:10px; cursor:pointer;">✏️ تعديل</button>
+              </div>
+            </div>
+          `);
+          markers.push(marker);
+        }
+      });
+
+      if (markers.length > 0) {
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.15));
+      }
+    }
+
+    function renderCards(data) {
+      const container = document.getElementById('cardsContainer');
+      container.innerHTML = '';
+
+      if (data.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">لا توجد بلاغات تطابق الفلتر المحدد</div>';
+        return;
+      }
+
+      data.forEach(item => {
+        const bDate = new Date(item.تاريخ_البلاغ);
+        const diffDays = Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24));
+        const isResolved = (item.حالة_البلاغ === 'تمت المعالجة');
+
+        const card = document.createElement('div');
+        card.className = `enc-card ${isResolved ? 'resolved' : ''}`;
+        card.onclick = (e) => {
+          if (e.target.tagName !== 'BUTTON') {
+            if (item.خط_العرض && item.خط_الطول) {
+              map.setView([item.خط_العرض, item.خط_الطول], 14);
+            }
+          }
+        };
+
+        card.innerHTML = `
+          <div class="enc-header">
+            <span class="enc-badge">بلاغ #${item.رقم_بلاغ_التعدي}</span>
+            <span class="enc-status ${isResolved ? 'green' : ''}">${item.حالة_البلاغ}</span>
+          </div>
+          <div class="enc-proj">${item.name}</div>
+          <div class="enc-meta">
+            <span>🏗️ ${item.contractor}</span>
+            <span>📍 ${item.المدينة} - ${item.الحي}</span>
+            <span>⏱️ ${diffDays} يوم تأخير</span>
+            <span>👔 ${item.program_manager_nwc}</span>
+          </div>
+          <div class="enc-actions">
+            ${!isResolved ? `<button onclick="markResolved(${item.رقم_بلاغ_التعدي})" class="btn btn-success" style="font-size:10px; padding:2px 8px;">✅ تمت المعالجة</button>` : `<button onclick="reopenReport(${item.رقم_بلاغ_التعدي})" class="btn btn-secondary" style="font-size:10px; padding:2px 8px;">🔄 إعادة فتح</button>`}
+            <button onclick="editEncroachment(${item.رقم_بلاغ_التعدي})" class="btn btn-secondary" style="font-size:10px; padding:2px 8px;">✏️ تعديل</button>
+            <button onclick="deleteEncroachment(${item.رقم_بلاغ_التعدي})" class="btn btn-danger" style="font-size:10px; padding:2px 8px;">🗑️ حذف</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:15px; color:#888;">لا توجد بيانات مطابقة</td></tr>';
+        return;
+      }
+
+      data.forEach(item => {
+        const bDate = new Date(item.تاريخ_البلاغ);
+        const diffDays = Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24));
+        const isResolved = (item.حالة_البلاغ === 'تمت المعالجة');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:800; color:#153E4B;">${item.رقم_بلاغ_التعدي}</td>
+          <td style="font-weight:700;">${item.name}</td>
+          <td>${item.contractor}</td>
+          <td>${item.المدينة}</td>
+          <td>${item.الحي}</td>
+          <td>${item.تاريخ_البلاغ}</td>
+          <td style="font-weight:800; color:${diffDays > 60 && !isResolved ? '#991B1B' : '#153E4B'};">${diffDays} يوم</td>
+          <td><span style="background:${isResolved ? '#DCFCE7' : '#E2EFEB'}; color:${isResolved ? '#166534' : '#153E4B'}; padding:2px 6px; border-radius:4px; font-weight:700; font-size:10px;">${item.حالة_البلاغ}</span></td>
+          <td>${item.program_manager_nwc}</td>
+          <td class="no-print" style="white-space:nowrap;">
+            ${!isResolved ? `<button onclick="markResolved(${item.رقم_بلاغ_التعدي})" class="btn btn-success" style="font-size:9.5px; padding:2px 6px;" title="تمت المعالجة">✅</button>` : ''}
+            <button onclick="editEncroachment(${item.رقم_بلاغ_التعدي})" class="btn btn-secondary" style="font-size:9.5px; padding:2px 6px;" title="تعديل">✏️</button>
+            <button onclick="deleteEncroachment(${item.رقم_بلاغ_التعدي})" class="btn btn-danger" style="font-size:9.5px; padding:2px 6px;" title="حذف">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterData(type, el) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      activeFilter = type;
+      renderAll();
+    }
+
+    function handleTableSearch(e) {
+      searchQuery = e.target.value;
+      renderAll();
+    }
+
+    // CRUD Operations
+    function markResolved(repId) {
+      const idx = currentData.findIndex(i => i.رقم_بلاغ_التعدي === repId);
+      if (idx !== -1) {
+        currentData[idx].حالة_البلاغ = 'تمت المعالجة';
+        saveData();
+        renderAll();
+        showToast(`تم تغيير حالة البلاغ #${repId} إلى "تمت المعالجة"`);
+      }
+    }
+
+    function reopenReport(repId) {
+      const idx = currentData.findIndex(i => i.رقم_بلاغ_التعدي === repId);
+      if (idx !== -1) {
+        currentData[idx].حالة_البلاغ = 'تحت معالجة المقاول';
+        saveData();
+        renderAll();
+        showToast(`تمت إعادة فتح البلاغ #${repId}`);
+      }
+    }
+
+    function deleteEncroachment(repId) {
+      if (confirm(`هل أنت متأكد من حذف البلاغ #${repId} نهائياً؟`)) {
+        currentData = currentData.filter(i => i.رقم_بلاغ_التعدي !== repId);
+        saveData();
+        renderAll();
+        showToast(`تم حذف البلاغ #${repId} بنجاح`);
+      }
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').innerText = '➕ إضافة بلاغ تعدي جديد';
+      document.getElementById('formEditIndex').value = '-1';
+      document.getElementById('encForm').reset();
+      document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('encModal').classList.add('active');
+    }
+
+    function editEncroachment(repId) {
+      const idx = currentData.findIndex(i => i.رقم_بلاغ_التعدي === repId);
+      if (idx === -1) return;
+      
+      const item = currentData[idx];
+      document.getElementById('modalTitle').innerText = `✏️ تعديل بلاغ #${repId}`;
+      document.getElementById('formEditIndex').value = idx;
+      document.getElementById('formRepId').value = item.رقم_بلاغ_التعدي;
+      document.getElementById('formDate').value = item.تاريخ_البلاغ || '';
+      document.getElementById('formProjName').value = item.name || '';
+      document.getElementById('formContractor').value = item.contractor || '';
+      document.getElementById('formPM').value = item.program_manager_nwc || 'م. عبدالله الأسود';
+      document.getElementById('formCity').value = item.المدينة || 'مدينة الرياض';
+      document.getElementById('formDistrict').value = item.الحي || '';
+      document.getElementById('formLat').value = item.خط_العرض || '';
+      document.getElementById('formLng').value = item.خط_الطول || '';
+      document.getElementById('formStatus').value = item.حالة_البلاغ || 'تحت معالجة المقاول';
+      document.getElementById('formDesc').value = item.وصف_التعدي || item.الإجراء_المطلوب || '';
+      
+      document.getElementById('encModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('encModal').classList.remove('active');
+    }
+
+    function handleSaveEncroachment(e) {
+      e.preventDefault();
+      const editIdx = parseInt(document.getElementById('formEditIndex').value);
+
+      const repId = parseInt(document.getElementById('formRepId').value);
+      const projName = document.getElementById('formProjName').value;
+      const contractor = document.getElementById('formContractor').value;
+      const pm = document.getElementById('formPM').value;
+      const city = document.getElementById('formCity').value;
+      const dist = document.getElementById('formDistrict').value;
+      const lat = parseFloat(document.getElementById('formLat').value) || (city === 'مدينة الرياض' ? 24.7136 : 25.2388);
+      const lng = parseFloat(document.getElementById('formLng').value) || (city === 'مدينة الرياض' ? 46.6753 : 45.2775);
+      const status = document.getElementById('formStatus').value;
+      const dateStr = document.getElementById('formDate').value;
+      const desc = document.getElementById('formDesc').value;
+
+      const recordObj = {
+        id: 0,
+        name: projName,
+        contractor: contractor,
+        program_manager_nwc: pm,
+        المدينة: city,
+        المحافظة: city,
+        الحي: dist,
+        خط_العرض: lat,
+        خط_الطول: lng,
+        رقم_بلاغ_التعدي: repId,
+        تاريخ_البلاغ: dateStr,
+        حالة_البلاغ: status,
+        وصف_التعدي: desc,
+        الإجراء_المطلوب: 'إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز'
+      };
+
+      if (editIdx === -1) {
+        // Check Duplicate
+        if (currentData.some(i => i.رقم_بلاغ_التعدي === repId)) {
+          alert(`رقم البلاغ #${repId} موجود مسبقاً في السجل!`);
+          return;
+        }
+        currentData.unshift(recordObj);
+        showToast(`تمت إضافة البلاغ #${repId} بنجاح!`);
+      } else {
+        currentData[editIdx] = { ...currentData[editIdx], ...recordObj };
+        showToast(`تم تحديث بيانات البلاغ #${repId} بنجاح!`);
+      }
+
+      saveData();
+      closeModal();
+      renderAll();
+    }
+
+    // Excel Upload & Advanced Governance Parser
+    function handleExcelUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('uploadFileName').innerText = `جاري قراءة وتحليل: ${file.name}...`;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rawJson = XLSX.utils.sheet_to_json(worksheet);
+
+          if (!rawJson || rawJson.length === 0) {
+            alert('الملف المرفوع فارغ!');
+            return;
+          }
+
+          // Apply Governance Filter & Matching Algorithm
+          const parsedRecords = [];
+          
+          rawJson.forEach(row => {
+            const repId = row['رقم بلاغ التعدي'] || row['رقم_بلاغ_التعدي'] || row['رقم البلاغ'] || row['ID'] || row['id'];
+            const status = row['حالة البلاغ'] || row['حالة_البلاغ'] || row['الحالة'] || row['Status'] || 'تحت معالجة المقاول';
+            const contractor = row['اسم المقاول'] || row['المقاول المنفذ'] || row['contractor'] || '';
+            const city = row['المدينة'] || row['المحافظة'] || 'مدينة الرياض';
+            const district = row['الحي'] || row['الموقع'] || '';
+            const dateVal = row['تاريخ البلاغ'] || row['تاريخ_البلاغ'] || row['تاريخ التعدي'] || '2026-06-01';
+            const lat = parseFloat(row['خط العرض'] || row['خط_العرض'] || row['Lat'] || row['latitude']) || null;
+            const lng = parseFloat(row['خط الطول'] || row['خط_الطول'] || row['Lng'] || row['longitude']) || null;
+            const desc = row['وصف التعدي'] || row['تعليق المركز'] || '';
+
+            // Match against project catalog
+            let matchedProject = null;
+            for (let p of projectsCatalog) {
+              if (contractor && (contractor.includes(p.contractor) || p.contractor.includes(contractor))) {
+                matchedProject = p;
+                break;
+              }
+            }
+
+            if (repId) {
+              parsedRecords.push({
+                id: matchedProject ? matchedProject.id : 0,
+                name: matchedProject ? matchedProject.name : (row['اسم المشروع'] || row['name'] || 'مشروع رأسمالي NWC'),
+                contractor: contractor || (matchedProject ? matchedProject.contractor : 'مقاول معتمد'),
+                program_manager_nwc: matchedProject ? matchedProject.pm : (row['مدير البرنامج'] || 'م. عبدالله الأسود'),
+                المدينة: city,
+                المحافظة: city,
+                الحي: district,
+                خط_العرض: lat || (city === 'مدينة الرياض' ? 24.7136 : 25.2388),
+                خط_الطول: lng || (city === 'مدينة الرياض' ? 46.6753 : 45.2775),
+                رقم_بلاغ_التعدي: parseInt(repId),
+                تاريخ_البلاغ: typeof dateVal === 'string' ? dateVal.split('T')[0] : '2026-06-01',
+                حالة_البلاغ: status,
+                وصف_التعدي: desc,
+                الإجراء_المطلوب: 'إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز'
+              });
+            }
+          });
+
+          if (parsedRecords.length > 0) {
+            currentData = parsedRecords;
+            saveData();
+            document.getElementById('uploadFileName').innerText = `تم استيراد وتحليل ${parsedRecords.length} بلاغاً بنجاح من: ${file.name}`;
+            renderAll();
+            showToast(`تم استيراد ${parsedRecords.length} بلاغاً وتحليلها بنجاح!`);
+          } else {
+            alert('لم يتم العثور على أعمدة متوافقة مع نظام البلاغات في هذا الملف.');
+          }
+
+        } catch(err) {
+          console.error(err);
+          alert('حدث خطأ أثناء معالجة ملف الإكسيل: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Export to Excel
+    function exportToExcel() {
+      const exportRows = currentData.map(item => ({
+        'رقم بلاغ التعدي': item.رقم_بلاغ_التعدي,
+        'اسم المشروع': item.name,
+        'المقاول المنفذ': item.contractor,
+        'مدير البرنامج NWC': item.program_manager_nwc,
+        'المدينة / المحافظة': item.المدينة,
+        'الحي / الموقع': item.الحي,
+        'تاريخ البلاغ': item.تاريخ_البلاغ,
+        'حالة البلاغ': item.حالة_البلاغ,
+        'خط العرض': item.خط_العرض,
+        'خط الطول': item.خط_الطول,
+        'الإجراء المطلوب': item.الإجراء_المطلوب || ''
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "البلاغات المعتمدة");
+      XLSX.writeFile(wb, "بلاغات_المشاريع_الجارية_NWC_المحدثة.xlsx");
+      showToast('تم تصدير ملف الإكسيل بنجاح!');
+    }
+
+    // Charts Initialization & Update
+    function initCharts() {
+      // Age Doughnut
+      const ctxAge = document.getElementById('ageDoughnutChart').getContext('2d');
+      ageChart = new Chart(ctxAge, {
+        type: 'doughnut',
+        data: {
+          labels: ['أقل من 30 يوماً', '31 - 60 يوماً', '61 - 120 يوماً', 'أكثر من 120 يوماً'],
+          datasets: [{
+            data: [4, 2, 4, 7],
+            backgroundColor: ['#168A89', '#E2EFEB', '#153E4B', '#991B1B'],
+            borderColor: '#EEF3EF',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { font: { family: 'Cairo', size: 9 }, boxWidth: 10, color: '#153E4B' } }
+          }
+        }
+      });
+
+      // PM Bar Chart
+      const ctxPM = document.getElementById('pmBarChart').getContext('2d');
+      pmChart = new Chart(ctxPM, {
+        type: 'bar',
+        data: {
+          labels: ['م. عبدالله الأسود', 'م. سعيد الحارث', 'م. تركي الاسمري', 'م. أمجد الفالح', 'م. عسكر لسوم', 'م. عبدالله العنزي'],
+          datasets: [{
+            label: 'عدد البلاغات',
+            data: [4, 4, 3, 3, 2, 1],
+            backgroundColor: '#168A89',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } },
+            y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function updateCharts() {
+      if (!ageChart || !pmChart) return;
+
+      const activeItems = currentData.filter(i => i.حالة_البلاغ !== 'تمت المعالجة');
+
+      // 1. Age distribution
+      let c1 = 0, c2 = 0, c3 = 0, c4 = 0;
+      activeItems.forEach(i => {
+        const bDate = new Date(i.تاريخ_البلاغ);
+        const diffDays = Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 30) c1++;
+        else if (diffDays <= 60) c2++;
+        else if (diffDays <= 120) c3++;
+        else c4++;
+      });
+
+      ageChart.data.datasets[0].data = [c1, c2, c3, c4];
+      ageChart.update();
+
+      // 2. PM distribution
+      const pmCounts = {};
+      activeItems.forEach(i => {
+        const pm = i.program_manager_nwc || 'غير محدد';
+        pmCounts[pm] = (pmCounts[pm] || 0) + 1;
+      });
+
+      const pmLabels = Object.keys(pmCounts);
+      const pmVals = Object.values(pmCounts);
+
+      pmChart.data.labels = pmLabels;
+      pmChart.data.datasets[0].data = pmVals;
+      pmChart.update();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMsg');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => {
+        t.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
