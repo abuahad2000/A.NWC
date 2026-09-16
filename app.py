@@ -264,7 +264,7 @@ with tab_map:
                 [lat, lng],
                 popup=folium.Popup(popup_html, max_width=300),
                 icon=folium.Icon(color=color, icon='info-sign')
-            ).addTo(m)
+            ).add_to(m)
 
     st_folium(m, width="100%", height=480)
 
