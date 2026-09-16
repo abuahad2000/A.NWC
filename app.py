@@ -40,7 +40,7 @@ st.markdown("""
     }
 
     .main .block-container {
-        padding-top: 1.5rem;
+        padding-top: 1.2rem;
         padding-bottom: 2rem;
     }
 
@@ -56,18 +56,18 @@ st.markdown("""
         background-color: #EEF3EF;
         border: 1px solid #D8E2DF;
         border-radius: 8px;
-        padding: 12px 16px;
+        padding: 10px 14px;
         border-top: 4px solid #168A89;
     }
     div[data-testid="stMetricValue"] > div {
         color: #153E4B !important;
         font-weight: 900 !important;
-        font-size: 26px !important;
+        font-size: 24px !important;
     }
     div[data-testid="stMetricLabel"] > div {
         color: #168A89 !important;
         font-weight: 700 !important;
-        font-size: 13px !important;
+        font-size: 12.5px !important;
     }
 
     /* Buttons */
@@ -85,17 +85,6 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Badges */
-    .badge {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 11px;
-        font-weight: 700;
-        background-color: #E2EFEB;
-        color: #153E4B;
-    }
-
     /* Sidebar */
     section[data-testid="stSidebar"] {
         background-color: #EEF3EF !important;
@@ -104,7 +93,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Load Default Verified Data
+# File Paths
 DATA_FILE = "data/encroachments_verified.json"
 CATALOG_FILE = "data/projects_catalog.json"
 
@@ -122,68 +111,188 @@ def load_catalog():
             return json.load(f)
     return []
 
+projects_catalog = load_catalog()
+base_date = datetime(2026, 9, 16)
+
+# ==============================================================================
+# STRICT GOVERNANCE & MATCHING PARSER FUNCTION
+# ==============================================================================
+def apply_strict_governance_rules(df_raw):
+    """
+    Applies the exact 4 NWC Governance Gates:
+    1. Filter for active pending statuses only (تحت معالجة المقاول, بانتظار اعتماد الجهة المتعدية)
+    2. Exclude O&M (تشغيل وصيانة)
+    3. Match against ongoing capital projects list (contractor + location/governorate)
+    """
+    valid_statuses = ['تحت معالجة المقاول', 'بانتظار اعتماد الجهة المتعدية']
+    
+    # 1. Filter status
+    status_col = None
+    for c in ['حالة البلاغ', 'حالة_البلاغ', 'الحالة', 'Status', 'status']:
+        if c in df_raw.columns:
+            status_col = c
+            break
+            
+    if status_col:
+        df_active = df_raw[df_raw[status_col].isin(valid_statuses)].copy()
+    else:
+        df_active = df_raw.copy()
+
+    matched_records = []
+    
+    # Ongoing Capital Projects Match Rules
+    # 1. Riyadh City Projects
+    riyadh_matching_rules = [
+        {"pm": "م. عبدالله الأسود", "id": 60, "name": "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", "contractor_keywords": ["سعد علي العيسى", "سعد العيسى", "العيسى"], "districts": None}, # Applies city-wide
+        {"pm": "م. تركي الاسمري", "id": 7, "name": "تنفيذ شبكة صرف صحي بأجزاء من احياء الحزم ونمار المرحلة الثالثة", "contractor_keywords": ["الخط الذهبي"], "districts": ["الحزم", "نمار"]},
+        {"pm": "م. تركي الاسمري", "id": 2, "name": "عقد تنفيذ شبكات صرف صحي بحي الحائر", "contractor_keywords": ["المسار الحديث"], "districts": ["الحائر"]},
+        {"pm": "م. عسكر لسوم", "id": 20, "name": "عقد تنفيذ شبكة صرف صحى بحى المعيزلية - المرحلة الأولى", "contractor_keywords": ["نظم البيئة"], "districts": ["المعيزلية"]},
+        {"pm": "م. عسكر لسوم", "id": 12, "name": "عقد تنفيذ شبكات الصرف الصحي بأجزاء من أحياء القدس والملك عبد الله", "contractor_keywords": ["ربوة التعمير", "راكو"], "districts": ["القدس", "الملك عبدالله", "الملك عبد الله"]},
+        {"pm": "م. امجد الفالح", "id": 58, "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", "contractor_keywords": ["نظم البيئة"], "districts": ["العوالي"]},
+        {"pm": "م. امجد الفالح", "id": 57, "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي (مرحلة أولى)", "contractor_keywords": ["الأعمال المدنية", "الاعمال المدنية"], "districts": ["العوالي"]},
+        {"pm": "م. عبدالله العنزي", "id": 23, "name": "عقد تنفيذ شبكات المياه بحي المهدية (عقد رقم 3)بمدينة الرياض", "contractor_keywords": ["الدايل"], "districts": ["المهدية"]}
+    ]
+
+    # 2. Governorates Projects
+    gov_matching_rules = [
+        {"pm": "م. سعيد الحارث", "id": 112, "name": "عقد استكمال مشاريع المياه بمحافظتي شقراء ومرات (المرحلة الاولي)", "contractor_keywords": ["ضيف الله العتيبي", "ضيف الله العتيبى"], "govs": ["شقراء", "مرات"]},
+        {"pm": "م. سعيد الحارث", "id": 114, "name": "عقد تنفيذ شبكات الصرف الصحي بمدينة شقراء ( المرحلة السابعة )", "contractor_keywords": ["أضواء رتاج", "اضواء رتاج"], "govs": ["شقراء"]},
+        {"pm": "م. سعيد الحارث", "id": 117, "name": "عقد تنفيذ و استكمال مشاريع المياه بمحافظة القويعية", "contractor_keywords": ["ماكسون"], "govs": ["القويعية", "الرويضة"]},
+        {"pm": "م. سعيد الحارث", "id": 107, "name": "عقد استكمال مشاريع المياه بمدينة الدوادمي ومراكز البجادية ونفي", "contractor_keywords": ["مشروعات المياه والطاقة", "مشروعات المياة والطاقة"], "govs": ["الدوادمي", "البجادية", "نفي"]},
+        {"pm": "م. شاكر الحقباني", "id": 95, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة الخرج (المرحلة السابعة)", "contractor_keywords": ["الخريف"], "govs": ["الخرج"]},
+        {"pm": "م. شاكر الحقباني", "id": 96, "name": "عقد تنفيذ مشروع صرف صحي بحوطة بني تميم (المرحلة الثالثة )", "contractor_keywords": ["السبق العربي"], "govs": ["حوطة بني تميم", "الحوطة"]},
+        {"pm": "م. شاكر الحقباني", "id": 97, "name": "عقد تنفيذ شبكات الصرف الصحي بحوطة بني تميم و الخرج (المرحلة الثانية)", "contractor_keywords": ["السبق العربي"], "govs": ["الخرج", "حوطة بني تميم"]},
+        {"pm": "م. شاكر الحقباني", "id": 99, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة الخرج", "contractor_keywords": ["مرامر"], "govs": ["الخرج"]},
+        {"pm": "م. سعيد الحارث", "id": 113, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة المزاحمية (المرحلة الثانية )", "contractor_keywords": ["السبق العربي"], "govs": ["المزاحمية"]},
+        {"pm": "م. سعيد الحارث", "id": 104, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة ضرماء (المرحلة الثانية)", "contractor_keywords": ["مسرة الوسطى"], "govs": ["ضرماء", "ضرما"]}
+    ]
+
+    for idx, row in df_active.iterrows():
+        rep_id = row.get('رقم بلاغ التعدي') or row.get('رقم_بلاغ_التعدي') or row.get('رقم البلاغ') or row.get('ID')
+        if not rep_id or pd.isnull(rep_id):
+            continue
+            
+        contractor = str(row.get('اسم المقاول') or row.get('المقاول المنفذ') or '')
+        city = str(row.get('المدينة') or row.get('المحافظة') or 'مدينة الرياض')
+        dist = str(row.get('الحي') or row.get('الموقع') or '')
+        comment = str(row.get('تعليق المركز') or row.get('وصف التعدي') or '')
+        owner = str(row.get('الجهة المالكة') or '')
+        status = str(row.get('حالة البلاغ') or row.get('حالة_البلاغ') or 'تحت معالجة المقاول')
+        date_val = str(row.get('تاريخ البلاغ') or row.get('تاريخ_البلاغ') or '2026-06-01').split()[0]
+        lat = row.get('خط العرض') or row.get('خط_العرض')
+        lng = row.get('خط الطول') or row.get('خط_الطول')
+
+        # Exclude pure O&M keywords
+        if "Management Operations and Maintenance" in comment or "تاسي للتشغيل والصيانة" in contractor:
+            continue
+
+        matched_rule = None
+        
+        # Check Governorates first
+        for g_rule in gov_matching_rules:
+            # Check contractor match
+            contr_match = any(kw in contractor for kw in g_rule['contractor_keywords'])
+            if contr_match:
+                # Check location match in city, district, owner, or comment
+                loc_match = any(gov in city or gov in dist or gov in owner or gov in comment for gov in g_rule['govs'])
+                if loc_match:
+                    matched_rule = g_rule
+                    break
+
+        # Check Riyadh City if not matched in governorates
+        if not matched_rule and (city == 'مدينة الرياض' or city == 'nan'):
+            for r_rule in riyadh_matching_rules:
+                contr_match = any(kw in contractor for kw in r_rule['contractor_keywords'])
+                if contr_match:
+                    if r_rule['districts'] is None:
+                        matched_rule = r_rule
+                        break
+                    else:
+                        dist_match = any(d in dist for d in r_rule['districts'])
+                        if dist_match:
+                            matched_rule = r_rule
+                            break
+
+        if matched_rule:
+            matched_records.append({
+                'id': matched_rule['id'],
+                'name': matched_rule['name'],
+                'contractor': contractor if contractor else 'مقاول معتمد',
+                'program_manager_nwc': matched_rule['pm'],
+                'المدينة': city if city != 'nan' else 'مدينة الرياض',
+                'المحافظة': city if city != 'nan' else 'مدينة الرياض',
+                'الحي': dist if dist != 'nan' else 'موقع معتمد',
+                'خط_العرض': float(lat) if pd.notnull(lat) else (24.7136 if city == 'مدينة الرياض' else 25.2388),
+                'خط_الطول': float(lng) if pd.notnull(lng) else (46.6753 if city == 'مدينة الرياض' else 45.2775),
+                'رقم_بلاغ_التعدي': int(rep_id),
+                'تاريخ_البلاغ': date_val,
+                'حالة_البلاغ': status,
+                'وصف_التعدي': str(row.get('وصف التعدي') or 'أعمال حفر وتمديد شبكات بدون استكمال إجراءات إخلاء الطرف'),
+                'الإجراء_المطلوب': 'إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز'
+            })
+
+    return matched_records
+
 # Session State Initialization
 if "encroachments" not in st.session_state:
     st.session_state.encroachments = load_initial_data()
 
-projects_catalog = load_catalog()
-base_date = datetime(2026, 9, 16)
-
-# Sidebar
+# Sidebar Controls
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/National_Water_Company_%28Saudi_Arabia%29_Logo.svg/1200px-National_Water_Company_%28Saudi_Arabia%29_Logo.svg.png", width=160)
     st.markdown("### 🏢 شركة المياه الوطنية")
     st.markdown("**وحدة حوكمة التعديات وحماية الأصول**")
     st.divider()
 
-    st.markdown("#### 📂 استيراد ملف إكسيل جديد:")
-    uploaded_file = st.file_uploader("اختر ملف XLSX", type=["xlsx", "xls"])
+    st.markdown("#### 📂 استيراد وتحليل ملف الإكسيل:")
+    uploaded_file = st.file_uploader("اختر ملف إكسيل خام (XLSX)", type=["xlsx", "xls"])
     
+    analysis_mode = st.radio(
+        "وضع التحليل عند الرفع:",
+        ["⚡ تطبيق قواعد الحوكمة والربط المكاني (المشاريع الجارية فقط)", "📋 عرض كافة البيانات الخام (بدون فلترة)"],
+        index=0
+    )
+
     if uploaded_file is not None:
         try:
             df_up = pd.read_excel(uploaded_file)
-            parsed_list = []
-            for _, row in df_up.iterrows():
-                rep_id = row.get('رقم بلاغ التعدي') or row.get('رقم_بلاغ_التعدي') or row.get('رقم البلاغ') or row.get('ID')
-                status = row.get('حالة البلاغ') or row.get('حالة_البلاغ') or row.get('الحالة') or 'تحت معالجة المقاول'
-                contractor = row.get('اسم المقاول') or row.get('المقاول المنفذ') or ''
-                city = row.get('المدينة') or row.get('المحافظة') or 'مدينة الرياض'
-                dist = row.get('الحي') or row.get('الموقع') or ''
-                date_val = str(row.get('تاريخ البلاغ') or row.get('تاريخ_البلاغ') or '2026-06-01').split()[0]
-                lat = row.get('خط العرض') or row.get('خط_العرض')
-                lng = row.get('خط الطول') or row.get('خط_الطول')
-                desc = row.get('وصف التعدي') or row.get('تعليق المركز') or ''
-
-                matched_proj = None
-                for p in projects_catalog:
-                    if str(contractor) in p['contractor'] or p['contractor'] in str(contractor):
-                        matched_proj = p
-                        break
-
-                if rep_id and pd.notnull(rep_id):
-                    parsed_list.append({
-                        'id': matched_proj['id'] if matched_proj else 0,
-                        'name': matched_proj['name'] if matched_proj else (row.get('اسم المشروع') or 'مشروع رأسمالي NWC'),
-                        'contractor': contractor if contractor else (matched_proj['contractor'] if matched_proj else 'مقاول معتمد'),
-                        'program_manager_nwc': matched_proj['pm'] if matched_proj else (row.get('مدير البرنامج') or 'م. عبدالله الأسود'),
-                        'المدينة': str(city),
-                        'المحافظة': str(city),
-                        'الحي': str(dist),
-                        'خط_العرض': float(lat) if pd.notnull(lat) else (24.7136 if city == 'مدينة الرياض' else 25.2388),
-                        'خط_الطول': float(lng) if pd.notnull(lng) else (46.6753 if city == 'مدينة الرياض' else 45.2775),
-                        'رقم_بلاغ_التعدي': int(rep_id),
-                        'تاريخ_البلاغ': date_val,
-                        'حالة_البلاغ': str(status),
-                        'وصف_التعدي': str(desc),
-                        'الإجراء_المطلوب': 'إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز'
-                    })
-            if parsed_list:
+            total_raw_rows = len(df_up)
+            
+            if "تطبيق قواعد الحوكمة" in analysis_mode:
+                parsed_list = apply_strict_governance_rules(df_up)
+                if parsed_list:
+                    st.session_state.encroachments = parsed_list
+                    st.success(f"✅ تم التحليل بنجاح! إجمالي السطور بالملف: {total_raw_rows:,} ➔ البلاغات المعتمدة للمشاريع الجارية: {len(parsed_list)} بلاغاً (تم استبعاد {total_raw_rows - len(parsed_list):,} بلاغاً معالجاً أو خارج نطاق المشاريع).")
+                else:
+                    st.warning("لم يتم العثور على بلاغات تطابق معايير المشاريع الجارية في هذا الملف.")
+            else:
+                # Raw Dump Mode
+                parsed_list = []
+                for _, row in df_up.iterrows():
+                    rep_id = row.get('رقم بلاغ التعدي') or row.get('رقم_بلاغ_التعدي') or row.get('رقم البلاغ') or row.get('ID')
+                    if rep_id and pd.notnull(rep_id):
+                        parsed_list.append({
+                            'id': 0,
+                            'name': str(row.get('اسم المشروع') or row.get('وصف التعدي') or 'مشروع غير محدد'),
+                            'contractor': str(row.get('اسم المقاول') or row.get('المقاول المنفذ') or 'غير محدد'),
+                            'program_manager_nwc': str(row.get('مدير البرنامج') or 'إدارة المشاريع'),
+                            'المدينة': str(row.get('المدينة') or 'مدينة الرياض'),
+                            'المحافظة': str(row.get('المدينة') or 'مدينة الرياض'),
+                            'الحي': str(row.get('الحي') or ''),
+                            'خط_العرض': float(row.get('خط العرض') or 24.7136) if pd.notnull(row.get('خط العرض')) else 24.7136,
+                            'خط_الطول': float(row.get('خط الطول') or 46.6753) if pd.notnull(row.get('خط الطول')) else 46.6753,
+                            'رقم_بلاغ_التعدي': int(rep_id),
+                            'تاريخ_البلاغ': str(row.get('تاريخ البلاغ') or '2026-06-01').split()[0],
+                            'حالة_البلاغ': str(row.get('حالة البلاغ') or 'تحت معالجة المقاول'),
+                            'وصف_التعدي': str(row.get('وصف التعدي') or ''),
+                            'الإجراء_المطلوب': 'متابعة المعالجة'
+                        })
                 st.session_state.encroachments = parsed_list
-                st.success(f"تم استيراد {len(parsed_list)} بلاغاً بنجاح!")
+                st.info(f"تم عرض جميع البلاغات الخام: {len(parsed_list):,} بلاغاً.")
         except Exception as ex:
-            st.error(f"خطأ أثناء قراءة الملف: {ex}")
+            st.error(f"خطأ أثناء قراءة وتحليل الملف: {ex}")
 
-    if st.button("🔄 استعادة البيانات الافتراضية (17 بلاغاً)"):
+    if st.button("🔄 استعادة البلاغات المعتمدة الافتراضية (17 بلاغاً)"):
         st.session_state.encroachments = load_initial_data()
         st.rerun()
 
@@ -313,7 +422,6 @@ with tab_manage:
             add_rep_id = st.number_input("رقم بلاغ التعدي *", min_value=1, step=1, value=18000)
             add_proj_name = st.selectbox("اسم المشروع *", [p['name'] for p in projects_catalog])
             
-            # Auto fill contractor and PM from catalog
             sel_p = next((p for p in projects_catalog if p['name'] == add_proj_name), None)
             add_contr = st.text_input("المقاول المنفذ *", value=sel_p['contractor'] if sel_p else "")
             add_pm = st.text_input("مدير البرنامج NWC *", value=sel_p['pm'] if sel_p else "م. عبدالله الأسود")
