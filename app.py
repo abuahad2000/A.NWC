@@ -120,6 +120,13 @@ def load_catalog():
 projects_catalog = load_catalog()
 base_date = datetime(2026, 9, 16)
 
+def normalize_ar(t):
+    if not isinstance(t, str):
+        return ""
+    t = t.strip().replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا')
+    t = t.replace('ة', 'ه').replace('ى', 'ي')
+    return t.lower()
+
 # ==============================================================================
 # STRICT GOVERNANCE & MATCHING PARSER FUNCTION
 # ==============================================================================
@@ -130,7 +137,7 @@ def apply_strict_governance_rules(df_raw):
     2. Exclude O&M (تشغيل وصيانة)
     3. Match against ongoing capital projects list (contractor + location/governorate)
     """
-    valid_statuses = ['تحت معالجة المقاول', 'بانتظار اعتماد الجهة المتعدية']
+    valid_statuses = [normalize_ar('تحت معالجة المقاول'), normalize_ar('بانتظار اعتماد الجهة المتعدية')]
     
     # 1. Filter status
     status_col = None
@@ -140,37 +147,35 @@ def apply_strict_governance_rules(df_raw):
             break
             
     if status_col:
-        df_active = df_raw[df_raw[status_col].isin(valid_statuses)].copy()
+        df_active = df_raw[df_raw[status_col].astype(str).apply(normalize_ar).isin(valid_statuses)].copy()
     else:
         df_active = df_raw.copy()
 
     matched_records = []
     
     # Ongoing Capital Projects Match Rules
-    # 1. Riyadh City Projects
     riyadh_matching_rules = [
-        {"pm": "م. عبدالله الأسود", "id": 60, "name": "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", "contractor_keywords": ["سعد علي العيسى", "سعد العيسى", "العيسى"], "districts": None}, # Applies city-wide
+        {"pm": "م. عبدالله الأسود", "id": 60, "name": "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", "contractor_keywords": ["سعد علي العيسي", "سعد العيسي", "العيسي"], "districts": None},
         {"pm": "م. تركي الاسمري", "id": 7, "name": "تنفيذ شبكة صرف صحي بأجزاء من احياء الحزم ونمار المرحلة الثالثة", "contractor_keywords": ["الخط الذهبي"], "districts": ["الحزم", "نمار"]},
         {"pm": "م. تركي الاسمري", "id": 2, "name": "عقد تنفيذ شبكات صرف صحي بحي الحائر", "contractor_keywords": ["المسار الحديث"], "districts": ["الحائر"]},
-        {"pm": "م. عسكر لسوم", "id": 20, "name": "عقد تنفيذ شبكة صرف صحى بحى المعيزلية - المرحلة الأولى", "contractor_keywords": ["نظم البيئة"], "districts": ["المعيزلية"]},
-        {"pm": "م. عسكر لسوم", "id": 12, "name": "عقد تنفيذ شبكات الصرف الصحي بأجزاء من أحياء القدس والملك عبد الله", "contractor_keywords": ["ربوة التعمير", "راكو"], "districts": ["القدس", "الملك عبدالله", "الملك عبد الله"]},
-        {"pm": "م. امجد الفالح", "id": 58, "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", "contractor_keywords": ["نظم البيئة"], "districts": ["العوالي"]},
-        {"pm": "م. امجد الفالح", "id": 57, "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي (مرحلة أولى)", "contractor_keywords": ["الأعمال المدنية", "الاعمال المدنية"], "districts": ["العوالي"]},
-        {"pm": "م. عبدالله العنزي", "id": 23, "name": "عقد تنفيذ شبكات المياه بحي المهدية (عقد رقم 3)بمدينة الرياض", "contractor_keywords": ["الدايل"], "districts": ["المهدية"]}
+        {"pm": "م. عسكر لسوم", "id": 20, "name": "عقد تنفيذ شبكة صرف صحى بحى المعيزلية - المرحلة الأولى", "contractor_keywords": ["نظم البيئه", "نظم البيئة"], "districts": ["المعيزليه", "المعيزلية"]},
+        {"pm": "م. عسكر لسوم", "id": 12, "name": "عقد تنفيذ شبكات الصرف الصحي بأجزاء من أحياء القدس والملك عبد الله", "contractor_keywords": ["ربوه التعمير", "راكو"], "districts": ["القدس", "الملك عبدالله"]},
+        {"pm": "م. امجد الفالح", "id": 58, "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", "contractor_keywords": ["نظم البيئه", "نظم البيئة"], "districts": ["العوالي"]},
+        {"pm": "م. امجد الفالح", "id": 57, "name": "عقد تنفيذ شبكات الصرف الصحي بحي العوالي (مرحلة أولى)", "contractor_keywords": ["الاعمال المدنيه", "الاعمال المدنية", "الأعمال المدنية"], "districts": ["العوالي"]},
+        {"pm": "م. عبدالله العنزي", "id": 23, "name": "عقد تنفيذ شبكات المياه بحي المهدية (عقد رقم 3)بمدينة الرياض", "contractor_keywords": ["الدايل"], "districts": ["المهديه", "المهدية"]}
     ]
 
-    # 2. Governorates Projects
     gov_matching_rules = [
         {"pm": "م. سعيد الحارث", "id": 112, "name": "عقد استكمال مشاريع المياه بمحافظتي شقراء ومرات (المرحلة الاولي)", "contractor_keywords": ["ضيف الله العتيبي", "ضيف الله العتيبى"], "govs": ["شقراء", "مرات"]},
-        {"pm": "م. سعيد الحارث", "id": 114, "name": "عقد تنفيذ شبكات الصرف الصحي بمدينة شقراء ( المرحلة السابعة )", "contractor_keywords": ["أضواء رتاج", "اضواء رتاج"], "govs": ["شقراء"]},
-        {"pm": "م. سعيد الحارث", "id": 117, "name": "عقد تنفيذ و استكمال مشاريع المياه بمحافظة القويعية", "contractor_keywords": ["ماكسون"], "govs": ["القويعية", "الرويضة"]},
-        {"pm": "م. سعيد الحارث", "id": 107, "name": "عقد استكمال مشاريع المياه بمدينة الدوادمي ومراكز البجادية ونفي", "contractor_keywords": ["مشروعات المياه والطاقة", "مشروعات المياة والطاقة"], "govs": ["الدوادمي", "البجادية", "نفي"]},
+        {"pm": "م. سعيد الحارث", "id": 114, "name": "عقد تنفيذ شبكات الصرف الصحي بمدينة شقراء ( المرحلة السابعة )", "contractor_keywords": ["اضواء رتاج", "أضواء رتاج"], "govs": ["شقراء"]},
+        {"pm": "م. سعيد الحارث", "id": 117, "name": "عقد تنفيذ و استكمال مشاريع المياه بمحافظة القويعية", "contractor_keywords": ["ماكسون"], "govs": ["القويعيه", "القويعية", "الرويضه", "الرويضة"]},
+        {"pm": "م. سعيد الحارث", "id": 107, "name": "عقد استكمال مشاريع المياه بمدينة الدوادمي ومراكز البجادية ونفي", "contractor_keywords": ["مشروعات المياه والطاقه", "مشروعات المياة والطاقة", "مشروعات المياه والطاقة"], "govs": ["الدوادمي", "البجاديه", "البجادية", "نفي"]},
         {"pm": "م. شاكر الحقباني", "id": 95, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة الخرج (المرحلة السابعة)", "contractor_keywords": ["الخريف"], "govs": ["الخرج"]},
-        {"pm": "م. شاكر الحقباني", "id": 96, "name": "عقد تنفيذ مشروع صرف صحي بحوطة بني تميم (المرحلة الثالثة )", "contractor_keywords": ["السبق العربي"], "govs": ["حوطة بني تميم", "الحوطة"]},
-        {"pm": "م. شاكر الحقباني", "id": 97, "name": "عقد تنفيذ شبكات الصرف الصحي بحوطة بني تميم و الخرج (المرحلة الثانية)", "contractor_keywords": ["السبق العربي"], "govs": ["الخرج", "حوطة بني تميم"]},
+        {"pm": "م. شاكر الحقباني", "id": 96, "name": "عقد تنفيذ مشروع صرف صحي بحوطة بني تميم (المرحلة الثالثة )", "contractor_keywords": ["السبق العربي"], "govs": ["حوطه بني تميم", "حوطة بني تميم", "الحوطه", "الحوطة"]},
+        {"pm": "م. شاكر الحقباني", "id": 97, "name": "عقد تنفيذ شبكات الصرف الصحي بحوطة بني تميم و الخرج (المرحلة الثانية)", "contractor_keywords": ["السبق العربي"], "govs": ["الخرج", "حوطه بني تميم", "حوطة بني تميم"]},
         {"pm": "م. شاكر الحقباني", "id": 99, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة الخرج", "contractor_keywords": ["مرامر"], "govs": ["الخرج"]},
-        {"pm": "م. سعيد الحارث", "id": 113, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة المزاحمية (المرحلة الثانية )", "contractor_keywords": ["السبق العربي"], "govs": ["المزاحمية"]},
-        {"pm": "م. سعيد الحارث", "id": 104, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة ضرماء (المرحلة الثانية)", "contractor_keywords": ["مسرة الوسطى"], "govs": ["ضرماء", "ضرما"]}
+        {"pm": "م. سعيد الحارث", "id": 113, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة المزاحمية (المرحلة الثانية )", "contractor_keywords": ["السبق العربي"], "govs": ["المزاحميه", "المزاحمية"]},
+        {"pm": "م. سعيد الحارث", "id": 104, "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظة ضرماء (المرحلة الثانية)", "contractor_keywords": ["مسره الوسطي", "مسرة الوسطى"], "govs": ["ضرماء", "ضرما"]}
     ]
 
     for idx, row in df_active.iterrows():
@@ -188,33 +193,37 @@ def apply_strict_governance_rules(df_raw):
         lat = row.get('خط العرض') or row.get('خط_العرض')
         lng = row.get('خط الطول') or row.get('خط_الطول')
 
+        norm_contr = normalize_ar(contractor)
+        norm_city = normalize_ar(city)
+        norm_dist = normalize_ar(dist)
+        norm_comment = normalize_ar(comment)
+        norm_owner = normalize_ar(owner)
+
         # Exclude pure O&M keywords
-        if "Management Operations and Maintenance" in comment or "تاسي للتشغيل والصيانة" in contractor:
+        if "management operations and maintenance" in norm_comment or "تاسي للتشغيل والصيانه" in norm_contr or "التشغيل والصيانه" in norm_contr or "تشغيل وصيانه" in norm_contr:
             continue
 
         matched_rule = None
         
         # Check Governorates first
         for g_rule in gov_matching_rules:
-            # Check contractor match
-            contr_match = any(kw in contractor for kw in g_rule['contractor_keywords'])
+            contr_match = any(normalize_ar(kw) in norm_contr for kw in g_rule['contractor_keywords'])
             if contr_match:
-                # Check location match in city, district, owner, or comment
-                loc_match = any(gov in city or gov in dist or gov in owner or gov in comment for gov in g_rule['govs'])
+                loc_match = any(normalize_ar(gov) in norm_city or normalize_ar(gov) in norm_dist or normalize_ar(gov) in norm_owner or normalize_ar(gov) in norm_comment for gov in g_rule['govs'])
                 if loc_match:
                     matched_rule = g_rule
                     break
 
         # Check Riyadh City if not matched in governorates
-        if not matched_rule and (city == 'مدينة الرياض' or city == 'nan'):
+        if not matched_rule and ("رياض" in norm_city or norm_city == 'nan' or not norm_city):
             for r_rule in riyadh_matching_rules:
-                contr_match = any(kw in contractor for kw in r_rule['contractor_keywords'])
+                contr_match = any(normalize_ar(kw) in norm_contr for kw in r_rule['contractor_keywords'])
                 if contr_match:
                     if r_rule['districts'] is None:
                         matched_rule = r_rule
                         break
                     else:
-                        dist_match = any(d in dist for d in r_rule['districts'])
+                        dist_match = any(normalize_ar(d) in norm_dist for d in r_rule['districts'])
                         if dist_match:
                             matched_rule = r_rule
                             break
@@ -225,15 +234,15 @@ def apply_strict_governance_rules(df_raw):
                 'name': matched_rule['name'],
                 'contractor': contractor if contractor else 'مقاول معتمد',
                 'program_manager_nwc': matched_rule['pm'],
-                'المدينة': city if city != 'nan' else 'مدينة الرياض',
-                'المحافظة': city if city != 'nan' else 'مدينة الرياض',
-                'الحي': dist if dist != 'nan' else 'موقع معتمد',
+                'المدينة': city if city != 'nan' and city else 'مدينة الرياض',
+                'المحافظة': city if city != 'nan' and city else 'مدينة الرياض',
+                'الحي': dist if dist != 'nan' and dist else 'موقع معتمد',
                 'خط_العرض': float(lat) if pd.notnull(lat) else (24.7136 if city == 'مدينة الرياض' else 25.2388),
                 'خط_الطول': float(lng) if pd.notnull(lng) else (46.6753 if city == 'مدينة الرياض' else 45.2775),
                 'رقم_بلاغ_التعدي': int(rep_id),
                 'تاريخ_البلاغ': date_val,
                 'حالة_البلاغ': status,
-                'وصف_التعدي': str(row.get('وصف التعدي') or 'أعمال حفر وتمديد شبكات بدون استكمال إجراءات إخلاء الطرف'),
+                'وصف_التعدي': str(row.get('وصف التعدي') or 'أعمال حفريات وتمديد شبكات بدون استكمال إجراءات إخلاء الطرف'),
                 'الإجراء_المطلوب': 'إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز'
             })
 
