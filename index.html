@@ -1200,6 +1200,41 @@
       renderAll();
     }
 
+    // Text Normalization for Arabic strings
+    function normalizeArabic(t) {
+      if (!t || typeof t !== 'string') return '';
+      return t.trim()
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .toLowerCase();
+    }
+
+    // Rules Definitions for Ongoing Capital Projects
+    const riyadhRules = [
+      { pm: "م. عبدالله الأسود", id: 60, name: "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", contractorKeywords: ["سعد علي العيسي", "سعد العيسي", "العيسي"], districts: null },
+      { pm: "م. تركي الاسمري", id: 7, name: "تنفيذ شبكة صرف صحي بأجزاء من احياء الحزم ونمار المرحلة الثالثة", contractorKeywords: ["الخط الذهبي"], districts: ["الحزم", "نمار"] },
+      { pm: "م. تركي الاسمري", id: 2, name: "عقد تنفيذ شبكات صرف صحي بحي الحائر", contractorKeywords: ["المسار الحديث"], districts: ["الحائر"] },
+      { pm: "م. عسكر لسوم", id: 20, name: "عقد تنفيذ شبكة صرف صحى بحى المعيزلية - المرحلة الأولى", contractorKeywords: ["نظم البيئه", "نظم البيئة"], districts: ["المعيزليه", "المعيزلية"] },
+      { pm: "م. عسكر لسوم", id: 12, name: "عقد تنفيذ شبكات الصرف الصحي بأجزاء من أحياء القدس والملك عبد الله", contractorKeywords: ["ربوه التعمير", "راكو"], districts: ["القدس", "الملك عبدالله"] },
+      { pm: "م. امجد الفالح", id: 58, name: "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", contractorKeywords: ["نظم البيئه", "نظم البيئة"], districts: ["العوالي"] },
+      { pm: "م. امجد الفالح", id: 57, name: "عقد تنفيذ شبكات الصرف الصحي بحي العوالي (مرحلة أولى)", contractorKeywords: ["الاعمال المدنيه", "الاعمال المدنية", "الأعمال المدنية"], districts: ["العوالي"] },
+      { pm: "م. عبدالله العنزي", id: 23, name: "عقد تنفيذ شبكات المياه بحي المهدية (عقد رقم 3)بمدينة الرياض", contractorKeywords: ["الدايل"], districts: ["المهديه", "المهدية"] }
+    ];
+
+    const govRules = [
+      { pm: "م. سعيد الحارث", id: 112, name: "عقد استكمال مشاريع المياه بمحافظتي شقراء ومرات (المرحلة الاولي)", contractorKeywords: ["ضيف الله العتيبي", "ضيف الله العتيبى"], govs: ["شقراء", "مرات"] },
+      { pm: "م. سعيد الحارث", id: 114, name: "عقد تنفيذ شبكات الصرف الصحي بمدينة شقراء ( المرحلة السابعة )", contractorKeywords: ["اضواء رتاج", "أضواء رتاج"], govs: ["شقراء"] },
+      { pm: "م. سعيد الحارث", id: 117, name: "عقد تنفيذ و استكمال مشاريع المياه بمحافظة القويعية", contractorKeywords: ["ماكسون"], govs: ["القويعيه", "القويعية", "الرويضه", "الرويضة"] },
+      { pm: "م. سعيد الحارث", id: 107, name: "عقد استكمال مشاريع المياه بمدينة الدوادمي ومراكز البجادية ونفي", contractorKeywords: ["مشروعات المياه والطاقه", "مشروعات المياة والطاقة", "مشروعات المياه والطاقة"], govs: ["الدوادمي", "البجاديه", "البجادية", "نفي"] },
+      { pm: "م. شاكر الحقباني", id: 95, name: "عقد تنفيذ شبكات الصرف الصحي بمحافظة الخرج (المرحلة السابعة)", contractorKeywords: ["الخريف"], govs: ["الخرج"] },
+      { pm: "م. شاكر الحقباني", id: 96, name: "عقد تنفيذ مشروع صرف صحي بحوطة بني تميم (المرحلة الثالثة )", contractorKeywords: ["السبق العربي"], govs: ["حوطه بني تميم", "حوطة بني تميم", "الحوطه", "الحوطة"] },
+      { pm: "م. شاكر الحقباني", id: 97, name: "عقد تنفيذ شبكات الصرف الصحي بحوطة بني تميم و الخرج (المرحلة الثانية)", contractorKeywords: ["السبق العربي"], govs: ["الخرج", "حوطه بني تميم", "حوطة بني تميم"] },
+      { pm: "م. شاكر الحقباني", id: 99, name: "عقد تنفيذ شبكات الصرف الصحي بمحافظة الخرج", contractorKeywords: ["مرامر"], govs: ["الخرج"] },
+      { pm: "م. سعيد الحارث", id: 113, name: "عقد تنفيذ شبكات الصرف الصحي بمحافظة المزاحمية (المرحلة الثانية )", contractorKeywords: ["السبق العربي"], govs: ["المزاحميه", "المزاحمية"] },
+      { pm: "م. سعيد الحارث", id: 104, name: "عقد تنفيذ شبكات الصرف الصحي بمحافظة ضرماء (المرحلة الثانية)", contractorKeywords: ["مسره الوسطي", "مسرة الوسطى"], govs: ["ضرماء", "ضرما"] }
+    ];
+
     // Excel Upload & Advanced Governance Parser
     function handleExcelUpload(event) {
       const file = event.target.files[0];
@@ -1221,57 +1256,113 @@
             return;
           }
 
+          const validStatuses = ['تحت معالجة المقاول', 'بانتظار اعتماد الجهة المتعدية'].map(normalizeArabic);
+
           // Apply Governance Filter & Matching Algorithm
           const parsedRecords = [];
+          let excludedOM = 0;
+          let excludedResolved = 0;
+          let excludedNonProjects = 0;
           
           rawJson.forEach(row => {
             const repId = row['رقم بلاغ التعدي'] || row['رقم_بلاغ_التعدي'] || row['رقم البلاغ'] || row['ID'] || row['id'];
-            const status = row['حالة البلاغ'] || row['حالة_البلاغ'] || row['الحالة'] || row['Status'] || 'تحت معالجة المقاول';
-            const contractor = row['اسم المقاول'] || row['المقاول المنفذ'] || row['contractor'] || '';
-            const city = row['المدينة'] || row['المحافظة'] || 'مدينة الرياض';
-            const district = row['الحي'] || row['الموقع'] || '';
-            const dateVal = row['تاريخ البلاغ'] || row['تاريخ_البلاغ'] || row['تاريخ التعدي'] || '2026-06-01';
+            if (!repId) return;
+
+            const rawStatus = String(row['حالة البلاغ'] || row['حالة_البلاغ'] || row['الحالة'] || row['Status'] || 'تحت معالجة المقاول');
+            const normStatus = normalizeArabic(rawStatus);
+
+            if (!validStatuses.includes(normStatus)) {
+              excludedResolved++;
+              return;
+            }
+
+            const contractor = String(row['اسم المقاول'] || row['المقاول المنفذ'] || row['contractor'] || '');
+            const city = String(row['المدينة'] || row['المحافظة'] || 'مدينة الرياض');
+            const district = String(row['الحي'] || row['الموقع'] || '');
+            const comment = String(row['تعليق المركز'] || row['وصف التعدي'] || '');
+            const owner = String(row['الجهة المالكة'] || '');
+            const dateVal = String(row['تاريخ البلاغ'] || row['تاريخ_البلاغ'] || row['تاريخ التعدي'] || '2026-06-01').split('T')[0].split(' ')[0];
             const lat = parseFloat(row['خط العرض'] || row['خط_العرض'] || row['Lat'] || row['latitude']) || null;
             const lng = parseFloat(row['خط الطول'] || row['خط_الطول'] || row['Lng'] || row['longitude']) || null;
-            const desc = row['وصف التعدي'] || row['تعليق المركز'] || '';
 
-            // Match against project catalog
-            let matchedProject = null;
-            for (let p of projectsCatalog) {
-              if (contractor && (contractor.includes(p.contractor) || p.contractor.includes(contractor))) {
-                matchedProject = p;
-                break;
+            const normContractor = normalizeArabic(contractor);
+            const normCity = normalizeArabic(city);
+            const normDist = normalizeArabic(district);
+            const normComment = normalizeArabic(comment);
+            const normOwner = normalizeArabic(owner);
+
+            // Gate 2: Exclude pure O&M
+            if (normComment.includes('management operations and maintenance') || normContractor.includes('تاسي للتشغيل والصيانه') || normContractor.includes('التشغيل والصيانه') || normContractor.includes('تشغيل وصيانه')) {
+              excludedOM++;
+              return;
+            }
+
+            let matchedRule = null;
+
+            // Gate 3: Check Governorates Projects
+            for (let g of govRules) {
+              const cMatch = g.contractorKeywords.some(kw => normContractor.includes(normalizeArabic(kw)));
+              if (cMatch) {
+                const locMatch = g.govs.some(gov => {
+                  const nGov = normalizeArabic(gov);
+                  return normCity.includes(nGov) || normDist.includes(nGov) || normOwner.includes(nGov) || normComment.includes(nGov);
+                });
+                if (locMatch) {
+                  matchedRule = g;
+                  break;
+                }
               }
             }
 
-            if (repId) {
+            // Gate 4: Check Riyadh City Projects
+            if (!matchedRule && (normCity.includes('رياض') || normCity === '' || normCity === 'nan')) {
+              for (let r of riyadhRules) {
+                const cMatch = r.contractorKeywords.some(kw => normContractor.includes(normalizeArabic(kw)));
+                if (cMatch) {
+                  if (!r.districts) {
+                    matchedRule = r;
+                    break;
+                  } else {
+                    const dMatch = r.districts.some(d => normDist.includes(normalizeArabic(d)));
+                    if (dMatch) {
+                      matchedRule = r;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+
+            if (matchedRule) {
               parsedRecords.push({
-                id: matchedProject ? matchedProject.id : 0,
-                name: matchedProject ? matchedProject.name : (row['اسم المشروع'] || row['name'] || 'مشروع رأسمالي NWC'),
-                contractor: contractor || (matchedProject ? matchedProject.contractor : 'مقاول معتمد'),
-                program_manager_nwc: matchedProject ? matchedProject.pm : (row['مدير البرنامج'] || 'م. عبدالله الأسود'),
-                المدينة: city,
-                المحافظة: city,
-                الحي: district,
+                id: matchedRule.id,
+                name: matchedRule.name,
+                contractor: contractor || 'مقاول معتمد',
+                program_manager_nwc: matchedRule.pm,
+                المدينة: city !== 'nan' && city ? city : 'مدينة الرياض',
+                المحافظة: city !== 'nan' && city ? city : 'مدينة الرياض',
+                الحي: district !== 'nan' && district ? district : 'موقع معتمد',
                 خط_العرض: lat || (city === 'مدينة الرياض' ? 24.7136 : 25.2388),
                 خط_الطول: lng || (city === 'مدينة الرياض' ? 46.6753 : 45.2775),
                 رقم_بلاغ_التعدي: parseInt(repId),
-                تاريخ_البلاغ: typeof dateVal === 'string' ? dateVal.split('T')[0] : '2026-06-01',
-                حالة_البلاغ: status,
-                وصف_التعدي: desc,
+                تاريخ_البلاغ: dateVal,
+                حالة_البلاغ: rawStatus,
+                وصف_التعدي: String(row['وصف التعدي'] || 'أعمال حفريات وتمديد شبكات بدون استكمال إجراءات إخلاء الطرف'),
                 الإجراء_المطلوب: 'إلزام المقاول بالمعالجة الميدانية الفورية وإغلاق البلاغ بنظام المركز'
               });
+            } else {
+              excludedNonProjects++;
             }
           });
 
           if (parsedRecords.length > 0) {
             currentData = parsedRecords;
             saveData();
-            document.getElementById('uploadFileName').innerText = `تم استيراد وتحليل ${parsedRecords.length} بلاغاً بنجاح من: ${file.name}`;
+            document.getElementById('uploadFileName').innerText = `تم استيراد ${parsedRecords.length} بلاغاً معتمداً بنجاح من إجمالي ${rawJson.length.toLocaleString()} سطر (تم استبعاد البلاغات المعالجة والتشغيل والصيانة).`;
             renderAll();
-            showToast(`تم استيراد ${parsedRecords.length} بلاغاً وتحليلها بنجاح!`);
+            showToast(`✅ تم تطبيق الحوكمة بنجاح: تم اعتماد ${parsedRecords.length} بلاغاً للمشاريع الجارية!`);
           } else {
-            alert('لم يتم العثور على أعمدة متوافقة مع نظام البلاغات في هذا الملف.');
+            alert('لم يتم العثور على بلاغات تطابق معايير المشاريع الجارية في هذا الملف.');
           }
 
         } catch(err) {
