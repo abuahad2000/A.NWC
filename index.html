@@ -2,1003 +2,461 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بوابة حوكمة ومتابعة تعديات المشاريع الجارية | شركة المياه الوطنية (NWC)</title>
-  <meta name="description" content="المنصة الرسمية لحوكمة والربط المكاني لبلاغات التعدي على مشاريع المياه والصرف الصحي بالقطاع الأوسط">
-  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/National_Water_Company_%28Saudi_Arabia%29_Logo.svg/512px-National_Water_Company_%28Saudi_Arabia%29_Logo.svg.png">
-  
-  <meta property="og:title" content="بوابة حوكمة تعديات المشاريع الرأسمالية | NWC">
-  <meta property="og:description" content="نظام الرصد والمطابقة المكانية والتعاقدية لبلاغات التعدي - القطاع الأوسط">
-  <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/National_Water_Company_%28Saudi_Arabia%29_Logo.svg/1200px-National_Water_Company_%28Saudi_Arabia%29_Logo.svg.png">
-  <meta property="og:type" content="website">
-  
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <title>تقرير إنفوجرافيك البلاغات المعلقة - المشاريع الرأسمالية NWC</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+  
   <style>
-    :root {
-      --primary: #153E4B;
-      --secondary: #168A89;
-      --bg-page: #FBF8F0;
-      --bg-phrase: #E2EFEB;
-      --bg-card: #EEF3EF;
-      --border-line: #D8E2DF;
-      --alert-red: #991B1B;
-      --success-green: #166534;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+    
+    @page { size: A4 portrait; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    
     body {
-      background-color: var(--bg-page);
-      color: var(--primary);
+      font-family: 'Cairo', sans-serif;
+      background-color: #FBF8F0;
+      color: #153E4B;
+      line-height: 1.4;
+      font-size: 13px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .page-container {
+      width: 210mm;
+      min-height: 297mm;
+      background: #FBF8F0;
+      padding: 10mm 12mm;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: visible;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .navbar {
-      background-color: var(--primary);
-      color: #FFFFFF;
-      padding: 12px 24px;
+    
+    .header {
+      border-bottom: 2px solid #D8E2DF;
+      padding-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(21, 62, 75, 0.15);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
     }
-    .nav-brand h1 { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-    .nav-brand p { font-size: 12px; color: #A2C8C6; }
-    .nav-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .btn {
-      padding: 7px 14px;
+    .header-titles h1 { font-size: 20px; font-weight: 900; color: #153E4B; }
+    .header-titles h2 { font-size: 13px; font-weight: 700; color: #168A89; margin-top: 3px; }
+    .header-badge {
+      background-color: #E2EFEB;
+      border: 1px solid #168A89;
+      color: #153E4B;
+      padding: 6px 12px;
       border-radius: 6px;
       font-weight: 700;
-      font-size: 12px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-      border: 1px solid transparent;
+      font-size: 11px;
+      text-align: left;
+      line-height: 1.4;
     }
-    .btn-primary { background-color: var(--secondary); color: #FFFFFF; }
-    .btn-primary:hover { background-color: #116867; }
-    .btn-secondary { background-color: var(--bg-phrase); color: var(--primary); border-color: var(--border-line); }
-    .btn-secondary:hover { background-color: #D3E6E0; }
-    .btn-outline { background-color: transparent; color: #FFFFFF; border-color: #A2C8C6; }
-    .btn-outline:hover { background-color: rgba(255, 255, 255, 0.1); }
-    .btn-danger { background-color: #FEE2E2; color: var(--alert-red); border-color: #FCA5A5; }
-    .btn-danger:hover { background-color: #FCA5A5; color: #7F1D1D; }
-    .btn-success { background-color: #DCFCE7; color: var(--success-green); border-color: #86EFAC; }
-    .btn-success:hover { background-color: #86EFAC; }
-    .upload-strip {
-      background-color: var(--bg-phrase);
-      border-bottom: 1px solid var(--border-line);
-      padding: 10px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .upload-box { display: flex; align-items: center; gap: 10px; }
-    .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
-    .file-input-wrapper input[type=file] {
-      position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-    }
-    .kpi-section {
+    
+    .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 14px;
-      padding: 16px 24px;
-      max-width: 1440px;
-      margin: 0 auto;
-      width: 100%;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 10px 0;
     }
     .kpi-card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-line);
-      border-radius: 8px;
-      padding: 12px 16px;
+      background: #EEF3EF;
+      border: 1px solid #D8E2DF;
+      border-radius: 6px;
+      padding: 10px;
       text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-      border-top: 3px solid var(--secondary);
+      border-top: 3px solid #168A89;
     }
-    .kpi-card.alert { border-top-color: var(--primary); }
-    .kpi-card.success { border-top-color: var(--success-green); }
-    .kpi-num { font-size: 24px; font-weight: 900; color: var(--primary); }
-    .kpi-lbl { font-size: 12px; font-weight: 700; color: var(--secondary); margin-top: 2px; }
-    .kpi-desc { font-size: 10.5px; color: #666; }
-    .main-container {
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 0 24px 20px;
+    .kpi-card.alert { border-top: 3px solid #153E4B; }
+    .kpi-title { font-size: 11px; font-weight: 700; color: #168A89; }
+    .kpi-value { font-size: 24px; font-weight: 900; color: #153E4B; margin: 4px 0; }
+    .kpi-sub { font-size: 10px; color: #555; }
+
+    .content-grid {
       display: grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap: 16px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
       flex: 1;
-      width: 100%;
     }
     .panel {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-line);
-      border-radius: 8px;
-      padding: 14px;
+      background: #EEF3EF;
+      border: 1px solid #D8E2DF;
+      border-radius: 6px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     }
-    .panel-header {
+    .panel.full-width { grid-column: span 2; }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #153E4B;
+      border-bottom: 1px solid #D8E2DF;
+      padding-bottom: 5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+    .bar-label { width: 50%; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-container { width: 35%; background: #E2EFEB; height: 8px; border-radius: 4px; overflow: hidden; }
+    .bar-fill { background: #168A89; height: 100%; transition: width 0.5s ease; }
+    .bar-fill.alert { background: #153E4B; }
+    .bar-val { width: 15%; text-align: left; font-weight: 800; color: #153E4B; }
+
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+    .mini-table th { background-color: #153E4B; color: #FFFFFF; padding: 5px 6px; text-align: right; font-weight: 700; white-space: nowrap; }
+    .mini-table td { padding: 5px 6px; border-bottom: 1px solid #D8E2DF; color: #153E4B; }
+    .mini-table tr:nth-child(even) { background-color: #FBF8F0; }
+    .badge-tag {
+      display: inline-block; padding: 2px 6px; border-radius: 4px;
+      font-size: 9.5px; font-weight: 700; background: #E2EFEB; color: #153E4B;
+    }
+    .badge-tag.pending { background: #FEF3C7; color: #92400E; }
+
+    .footer {
+      border-top: 1px solid #D8E2DF;
+      padding-top: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border-line);
+      font-size: 10px;
+      color: #168A89;
+      font-weight: 600;
+      margin-top: 10px;
     }
-    .panel-title {
+    
+    /* --- شريط التحكم العلوي --- */
+    .controls {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      display: flex;
+      gap: 10px;
+      z-index: 9999;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: #153E4B;
+      color: #FFF;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
       font-size: 14px;
-      font-weight: 800;
-      color: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
       gap: 6px;
+      text-decoration: none; /* لإزالة الخط من رابط HTML */
     }
-    #map {
-      width: 100%;
-      height: 420px;
-      border-radius: 6px;
-      border: 1px solid var(--border-line);
-      z-index: 10;
-    }
-    .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
-    .filter-chip {
-      padding: 4px 10px;
-      border-radius: 16px;
-      font-size: 11px;
-      font-weight: 700;
-      background-color: var(--bg-phrase);
-      color: var(--primary);
-      cursor: pointer;
-      border: 1px solid var(--border-line);
-      transition: all 0.2s;
-    }
-    .filter-chip.active { background-color: var(--secondary); color: #FFFFFF; border-color: var(--secondary); }
-    .cards-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      overflow-y: auto;
-      max-height: 420px;
-      padding-right: 2px;
-    }
-    .enc-card {
-      background-color: #FFFFFF;
-      border: 1px solid var(--border-line);
-      border-radius: 6px;
-      padding: 10px 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border-right: 4px solid var(--secondary);
-    }
-    .enc-card:hover { transform: translateX(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-    .enc-card.resolved { border-right-color: var(--success-green); opacity: 0.75; }
-    .enc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .enc-badge {
-      background-color: var(--bg-phrase); color: var(--primary);
-      padding: 1px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 800;
-    }
-    .enc-status {
-      font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px;
-      background-color: var(--bg-phrase); color: var(--secondary);
-    }
-    .enc-status.green { background-color: #DCFCE7; color: var(--success-green); }
-    .enc-proj { font-size: 12px; font-weight: 800; color: var(--primary); margin-bottom: 3px; }
-    .enc-meta { font-size: 10.5px; color: #555; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-    .enc-actions {
-      display: flex; gap: 6px; justify-content: flex-end;
-      border-top: 1px dashed var(--border-line); padding-top: 5px;
-    }
-    .charts-section {
-      grid-column: span 2;
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 16px;
-    }
-    .chart-box { height: 180px; position: relative; }
-    .table-section {
-      max-width: 1440px;
-      margin: 0 auto 30px;
-      width: 100%;
-      padding: 0 24px;
-    }
-    .table-tools {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 10px; gap: 10px; flex-wrap: wrap;
-    }
-    .search-input {
-      padding: 6px 12px; border: 1px solid var(--border-line); border-radius: 6px;
-      font-size: 11.5px; min-width: 240px; background: #FFFFFF; color: var(--primary);
-    }
-    .data-table {
-      width: 100%; border-collapse: collapse; font-size: 11px;
-      background-color: #FFFFFF; border-radius: 6px; overflow: hidden;
-    }
-    .data-table th {
-      background-color: var(--primary); color: #FFFFFF; padding: 8px 10px;
-      text-align: right; font-weight: 700; white-space: nowrap;
-    }
-    .data-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-line); color: var(--primary); }
-    .data-table tr:hover { background-color: var(--bg-phrase); }
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(21, 62, 75, 0.6); display: none;
-      justify-content: center; align-items: center; z-index: 9999; padding: 16px;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-content {
-      background: #FFFFFF; border-radius: 8px; width: 100%; max-width: 550px;
-      max-height: 90vh; overflow-y: auto; padding: 20px;
-      border: 1px solid var(--border-line); box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-    .modal-title {
-      font-size: 15px; font-weight: 800; color: var(--primary);
-      margin-bottom: 12px; border-bottom: 2px solid var(--secondary); padding-bottom: 6px;
-    }
-    .form-group { margin-bottom: 10px; }
-    .form-label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 3px; color: var(--primary); }
-    .form-control {
-      width: 100%; padding: 6px 10px; border: 1px solid var(--border-line);
-      border-radius: 4px; font-size: 11px; color: var(--primary);
-    }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .modal-actions {
-      display: flex; justify-content: flex-end; gap: 8px;
-      margin-top: 14px; border-top: 1px solid var(--border-line); padding-top: 10px;
-    }
-    .toast {
-      position: fixed; bottom: 20px; left: 20px;
-      background-color: var(--primary); color: #FFFFFF;
-      padding: 10px 18px; border-radius: 6px; font-size: 12px; font-weight: 700;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: none; z-index: 10000;
-      border-left: 4px solid var(--secondary);
-    }
-    .toast.show { display: block; animation: fadeIn 0.3s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .btn:hover { background: #168A89; }
+    .btn-upload { background: #168A89; }
+    .btn-report { background: #0066b3; } /* لون مميز لزر التقرير */
+    .btn-report:hover { background: #00509e; }
+    
+    #fileInput { display: none; }
+
     @media print {
-      body * { visibility: hidden; }
-      .printable-pending-section, .printable-pending-section * { visibility: visible; }
-      .printable-pending-section {
-        position: absolute; left: 0; top: 0; width: 100%;
-        background: transparent !important; padding: 8mm;
-      }
-      .print-header {
-        display: block !important; margin-bottom: 12px;
-        border-bottom: 2px solid #153E4B; padding-bottom: 8px;
-      }
-      .no-print { display: none !important; }
-      .data-table { font-size: 9.5px; border: 1px solid #D8E2DF; }
-      .data-table th {
-        background-color: #153E4B !important; color: #FFFFFF !important;
-        -webkit-print-color-adjust: exact; print-color-adjust: exact;
-      }
-      .data-table td { border: 1px solid #D8E2DF; padding: 5px 8px; }
-    }
-    .print-header { display: none; }
-    @media (max-width: 768px) {
-      .main-container { grid-template-columns: 1fr !important; }
-      .charts-section { grid-template-columns: 1fr !important; grid-column: span 1 !important; }
-      .navbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .nav-actions { width: 100%; }
-      .btn { flex: 1; justify-content: center; min-width: 120px; }
-      .upload-strip { flex-direction: column; align-items: flex-start; }
-      .search-input { min-width: 100%; }
-      .kpi-section { grid-template-columns: repeat(2, 1fr); }
+      .controls { display: none !important; }
+      body { background: transparent; min-height: auto; display: block; padding: 0; }
+      .page-container { width: 210mm; min-height: 297mm; padding: 10mm 12mm; margin: 0 auto; box-shadow: none; }
+      .panel { break-inside: avoid; }
     }
   </style>
 </head>
 <body>
 
-  <nav class="navbar no-print">
-    <div class="nav-brand">
-      <h1>🏢 شركة المياه الوطنية (NWC) - القطاع الأوسط</h1>
-      <p>بوابة حوكمة ومتابعة تعديات المشاريع الجارية (مدينة الرياض والمحافظات)</p>
-    </div>
-    <div class="nav-actions">
-      <button onclick="openAddModal()" class="btn btn-secondary">➕ إضافة بلاغ جديد</button>
-      <button onclick="exportToExcel()" class="btn btn-secondary">📥 تصدير إكسيل</button>
-      <button onclick="window.print()" class="btn btn-primary">🖨️ طباعة جدول البلاغات</button>
-    </div>
-  </nav>
-
-  <div class="upload-strip no-print">
-    <div class="upload-box">
-      <strong>📂 استيراد وتحليل ملف إكسيل جديد:</strong>
-      <div class="file-input-wrapper">
-        <button class="btn btn-primary">📎 اختر ملف XLSX</button>
-        <input type="file" id="excelFileInput" accept=".xlsx, .xls" onchange="handleExcelUpload(event)">
-      </div>
-      <span id="uploadFileName" style="font-size:11px; color:#666;">لم يتم رفع ملف جديد (تُعرض البيانات المعتمدة)</span>
-    </div>
-    <div>
-      <button onclick="resetToDefaults()" class="btn btn-danger" style="font-size:11px; padding:4px 10px;">🔄 استعادة البيانات الافتراضية</button>
-    </div>
+  <!-- شريط التحكم العلوي المحدث -->
+  <div class="controls">
+    <a href="infographic_report.html" class="btn btn-report" title="الانتقال إلى ملف التقرير الرئيسي">📄 عرض تقرير الإنفوجرافيك</a>
+    <label for="fileInput" class="btn btn-upload">📂 تحديث من ملف الإكسل</label>
+    <input type="file" id="fileInput" accept=".xlsx, .xls" onchange="handleFileUpload(event)">
+    <button class="btn" onclick="window.print()">🖨️ طباعة التقرير (A4)</button>
   </div>
 
-  <div class="kpi-section no-print">
-    <div class="kpi-card">
-      <div class="kpi-num" id="kpiTotal">17</div>
-      <div class="kpi-lbl">إجمالي البلاغات النشطة</div>
-      <div class="kpi-desc" id="kpiSubLoc">13 الرياض + 4 المحافظات</div>
-    </div>
-    <div class="kpi-card alert">
-      <div class="kpi-num" id="kpiContractor">16</div>
-      <div class="kpi-lbl">تحت معالجة المقاول</div>
-      <div class="kpi-desc">إلزام بالمعالجة الميدانية الفورية</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-num" id="kpiReview">1</div>
-      <div class="kpi-lbl">بانتظار اعتماد الجهة</div>
-      <div class="kpi-desc">متابعة إخلاء الطرف وإغلاق البلاغ</div>
-    </div>
-    <div class="kpi-card success">
-      <div class="kpi-num" id="kpiResolved">0</div>
-      <div class="kpi-lbl">تمت المعالجة والإغلاق</div>
-      <div class="kpi-desc">بلاغات منجزة خلال الجلسة</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-num" id="kpiAvgDays">148</div>
-      <div class="kpi-lbl">متوسط أيام التأخير</div>
-      <div class="kpi-desc">حساب آلي بحسب تاريخ الاستخراج</div>
-    </div>
-  </div>
-
-  <div class="main-container no-print">
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">🗺️ خريطة OpenStreetMap التفاعلية للتعديات</div>
-        <div class="filter-group">
-          <div class="filter-chip active" onclick="filterData('all', this)">الكل (<span id="countAll">17</span>)</div>
-          <div class="filter-chip" onclick="filterData('riyadh', this)">الرياض (<span id="countRiyadh">13</span>)</div>
-          <div class="filter-chip" onclick="filterData('govs', this)">المحافظات (<span id="countGovs">4</span>)</div>
-          <div class="filter-chip" onclick="filterData('resolved', this)">المعالجة (<span id="countResolved">0</span>)</div>
-        </div>
+  <div class="page-container">
+    
+    <div class="header">
+      <div class="header-titles">
+        <h1>🏢 شركة المياه الوطنية (NWC) - القطاع الأوسط</h1>
+        <h2>📊 تقرير البلاغات المعلقة للمشاريع الرأسمالية (مدينة الرياض والمحافظات)</h2>
       </div>
-      <div id="map"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">📋 بطاقات البلاغات قيد الإجراء</div>
-        <span id="activeCountBadge" style="font-size:11px; font-weight:700; color:var(--secondary);">17 بلاغاً</span>
+      <div class="header-badge">
+        <div>تاريخ التحديث: <span id="currentDate">17 سبتمبر 2026</span></div>
+        <div>إجمالي المعروض: <span id="totalDisplayed">17</span> بلاغاً</div>
       </div>
-      <div class="cards-list" id="cardsContainer"></div>
     </div>
 
-    <div class="charts-section">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">📊 إجمالي البلاغات المعلقة</div>
+        <div class="kpi-value" id="kpiTotal">17</div>
+        <div class="kpi-sub" id="kpiTotalSub">13 بالرياض + 4 بالمحافظات</div>
+      </div>
+      <div class="kpi-card alert">
+        <div class="kpi-title">🔧 تحت معالجة المقاول</div>
+        <div class="kpi-value" id="kpiContractor">16</div>
+        <div class="kpi-sub" id="kpiContractorSub">94% من إجمالي البلاغات</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">📝 بانتظار اعتماد الجهة</div>
+        <div class="kpi-value" id="kpiPending">1</div>
+        <div class="kpi-sub" id="kpiPendingSub">حي العوالي (نظم البيئة)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">⏱️ متوسط زمن التعليق</div>
+        <div class="kpi-value" id="kpiAvgDays">148</div>
+        <div class="kpi-sub">يوماً للبلاغ الواحد</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      
       <div class="panel">
-        <div class="panel-header"><div class="panel-title">⏳ التوزيع الزمني للبلاغات المعلقة</div></div>
-        <div class="chart-box"><canvas id="ageDoughnutChart"></canvas></div>
+        <div class="panel-title">📍 أكثر المواقع تسجيلاً للبلاغات المعلقة</div>
+        <div id="locationsContainer"></div>
       </div>
+
       <div class="panel">
-        <div class="panel-header"><div class="panel-title">👔 البلاغات المعلقة حسب مدير البرنامج</div></div>
-        <div class="chart-box"><canvas id="pmBarChart"></canvas></div>
+        <div class="panel-title">⏳ التوزيع الزمني للبلاغات المعلقة</div>
+        <div style="height: 140px; position: relative;">
+          <canvas id="ageChart"></canvas>
+        </div>
+        <div style="font-size: 9.5px; color: #153E4B; background: #E2EFEB; padding: 5px; border-radius: 4px; margin-top: 8px; text-align: center; line-height: 1.3;">
+          ⚠️ <strong>تنبيه الإقفال:</strong> <span id="alertText">11 بلاغاً</span> تجاوزت مهلة الشهرين (60 يوماً).
+        </div>
       </div>
+
+      <div class="panel">
+        <div class="panel-title">👔 البلاغات حسب مدير البرنامج</div>
+        <div id="managersContainer"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">🚧 المقاولون المتأخرون</div>
+        <div style="height: 140px; position: relative;">
+          <canvas id="contractorChart"></canvas>
+        </div>
+      </div>
+
+      <div class="panel full-width">
+        <div class="panel-title">📋 جدول البلاغات المعلقة المعتمدة للمشاريع الجارية</div>
+        <div style="overflow-x: auto; max-height: 320px; overflow-y: auto;">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>رقم البلاغ</th>
+                <th>اسم المشروع</th>
+                <th>المقاول المنفذ</th>
+                <th>المدينة / الحي</th>
+                <th>تاريخ البلاغ</th>
+                <th>التأخير</th>
+                <th>حالة البلاغ</th>
+                <th>مدير البرنامج</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>🏢 شركة المياه الوطنية | وحدة التعديات وحماية الأصول الرأسمالية</div>
+      <div>نظام الحوكمة والربط المكاني 100%</div>
+      <div><strong>إعداد: عبدالله الزغيبي - التعديات والحوادث</strong></div>
     </div>
   </div>
-
-  <div class="printable-pending-section table-section">
-    <div class="print-header">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <h2 style="font-size:17px; color:#153E4B; font-weight:900;">🏢 شركة المياه الوطنية (NWC) - القطاع الأوسط</h2>
-          <h3 style="font-size:12px; color:#168A89; font-weight:700; margin-top:2px;">جدول البلاغات المعلقة المعتمدة للمشاريع الجارية (مدينة الرياض والمحافظات)</h3>
-        </div>
-        <div style="text-align:left; font-size:10px; color:#153E4B;">
-          <div>تاريخ الاستخراج: 17 سبتمبر 2026</div>
-          <div id="printTableCount">إجمالي البلاغات: 17 بلاغاً معتمداً</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header no-print">
-        <div class="panel-title">📑 جدول حوكمة البلاغات التفصيلي (معد للطباعة والتصدير)</div>
-        <div class="table-tools">
-          <input type="text" id="tableSearch" class="search-input" placeholder="🔍 بحث برقم البلاغ، المشروع، المقاول، الحي..." oninput="handleTableSearch(event)">
-        </div>
-      </div>
-      <div style="overflow-x:auto;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>رقم البلاغ</th>
-              <th>اسم المشروع</th>
-              <th>المقاول المنفذ</th>
-              <th>المدينة / المحافظة</th>
-              <th>الحي / الشارع</th>
-              <th>تاريخ البلاغ</th>
-              <th>أيام التأخير</th>
-              <th>حالة البلاغ</th>
-              <th>مدير البرنامج</th>
-              <th class="no-print">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="print-header" style="margin-top:12px; border-top:1px solid #D8E2DF; border-bottom:none; padding-top:6px; font-size:9.5px; display:flex; justify-content:space-between; color:#168A89;">
-      <div>نظام الحوكمة والربط المكاني المعتمد 100% | شركة المياه الوطنية</div>
-      <div><strong>إعداد: ادارة التعديات والحوادث</strong></div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="encModal">
-    <div class="modal-content">
-      <div class="modal-title" id="modalTitle">➕ إضافة بلاغ تعدي جديد</div>
-      <form id="encForm" onsubmit="handleSaveEncroachment(event)">
-        <input type="hidden" id="formEditIndex" value="-1">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">رقم بلاغ التعدي *</label>
-            <input type="number" id="formRepId" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">تاريخ البلاغ *</label>
-            <input type="date" id="formDate" class="form-control" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">اسم المشروع *</label>
-          <input type="text" id="formProjName" class="form-control" required list="projectOptions">
-          <datalist id="projectOptions"></datalist>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">المقاول المنفذ *</label>
-            <input type="text" id="formContractor" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">مدير البرنامج NWC *</label>
-            <select id="formPM" class="form-control" required>
-              <option value="م. عبدالله الأسود">م. عبدالله الأسود</option>
-              <option value="م. سعيد الحارث">م. سعيد الحارث</option>
-              <option value="م. تركي الاسمري">م. تركي الاسمري</option>
-              <option value="م. امجد الفالح">م. امجد الفالح</option>
-              <option value="م. عسكر لسوم">م. عسكر لسوم</option>
-              <option value="م. عبدالله العنزي">م. عبدالله العنزي</option>
-              <option value="م. شاكر الحقباني">م. شاكر الحقباني</option>
-              <option value="م. علي القحطاني">م. علي القحطاني</option>
-              <option value="م. سفر العتيبي">م. سفر العتيبي</option>
-              <option value="م. علي الشهري">م. علي الشهري</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">المدينة / المحافظة *</label>
-            <input type="text" id="formCity" class="form-control" required value="مدينة الرياض">
-          </div>
-          <div class="form-group">
-            <label class="form-label">الحي / الموقع *</label>
-            <input type="text" id="formDistrict" class="form-control" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">خط العرض (Latitude)</label>
-            <input type="number" step="any" id="formLat" class="form-control" placeholder="مثال: 24.7136">
-          </div>
-          <div class="form-group">
-            <label class="form-label">خط الطول (Longitude)</label>
-            <input type="number" step="any" id="formLng" class="form-control" placeholder="مثال: 46.6753">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">حالة البلاغ *</label>
-          <select id="formStatus" class="form-control" required>
-            <option value="تحت معالجة المقاول">تحت معالجة المقاول</option>
-            <option value="بانتظار اعتماد الجهة المتعدية">بانتظار اعتماد الجهة المتعدية</option>
-            <option value="تمت المعالجة">تمت المعالجة</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">وصف التعدي / الإجراء المطلوب</label>
-          <textarea id="formDesc" class="form-control" rows="2" placeholder="ملاحظات الحفر والسفلتة أو الإجراء المطلوب..."></textarea>
-        </div>
-        <div class="modal-actions">
-          <button type="button" onclick="closeModal()" class="btn btn-secondary">إلغاء</button>
-          <button type="submit" class="btn btn-primary">حفظ البلاغ</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="toast" id="toastMsg">تم التحديث بنجاح!</div>
 
   <script>
-    let defaultData = [];
-    let projectsCatalog = [];
-    let currentData = [];
-    let activeFilter = 'all';
-    let searchQuery = '';
-    let map = null;
-    let markers = [];
-    let ageChart = null;
-    let pmChart = null;
-    const baseCalculationDate = new Date('2026-09-17');
+    let ageChartInstance = null;
+    let contractorChartInstance = null;
 
-    // تحميل البيانات من ملفات JSON الخارجية
-    async function loadDataFromJSON() {
-      try {
-        const [encResponse, projResponse] = await Promise.all([
-          fetch('data/encroachments_verified.json'),
-          fetch('data/projects_catalog.json')
-        ]);
-        
-        if (!encResponse.ok || !projResponse.ok) {
-          throw new Error('فشل في تحميل ملفات البيانات');
-        }
-        
-        defaultData = await encResponse.json();
-        projectsCatalog = await projResponse.json();
-        
-        // تحميل البيانات المحفوظة أو استخدام البيانات الافتراضية
-        loadStoredData();
-        initOpenStreetMap();
-        initCharts();
-        populateProjectDatalist();
-        renderAll();
-      } catch (error) {
-        console.error('خطأ في تحميل البيانات:', error);
-        alert('حدث خطأ في تحميل البيانات من الملفات الخارجية. تأكد من وجود ملفات JSON في مجلد data/');
-      }
-    }
+    const defaultData = [
+      { رقم_البلاغ: 3598, اسم_المشروع: "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", المقاول: "مجموعة سعد علي العيسى للمقاولات", المدينة: "مدينة الرياض", الحي: "الياسمين", التاريخ: "2026-03-17", التأخير: 183, الحالة: "تحت معالجة المقاول", المدير: "م. عبدالله الأسود" },
+      { رقم_البلاغ: 4475, اسم_المشروع: "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", المقاول: "مجموعة سعد علي العيسى للمقاولات", المدينة: "مدينة الرياض", الحي: "شبرا", التاريخ: "2026-05-07", التأخير: 132, الحالة: "تحت معالجة المقاول", المدير: "م. عبدالله الأسود" },
+      { رقم_البلاغ: 15537, اسم_المشروع: "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", المقاول: "مجموعة سعد علي العيسى للمقاولات", المدينة: "مدينة الرياض", الحي: "القادسية", التاريخ: "2026-06-24", التأخير: 84, الحالة: "تحت معالجة المقاول", المدير: "م. عبدالله الأسود" },
+      { رقم_البلاغ: 17192, اسم_المشروع: "تنفيذ خطوط صرف صحي متفرقة بمدينة الرياض – عقد رقم 26 – المرحلة الثالثة", المقاول: "مجموعة سعد علي العيسى للمقاولات", المدينة: "مدينة الرياض", الحي: "النظيم", التاريخ: "2026-08-08", التأخير: 39, الحالة: "تحت معالجة المقاول", المدير: "م. عبدالله الأسود" },
+      { رقم_البلاغ: 14679, اسم_المشروع: "تنفيذ شبكة صرف صحي بأجزاء من احياء الحزم ونمار المرحلة الثالثة", المقاول: "شركة الخط الذهبي للمقاولات", المدينة: "مدينة الرياض", الحي: "الحزم", التاريخ: "2026-05-14", التأخير: 125, الحالة: "تحت معالجة المقاول", المدير: "م. تركي الاسمري" },
+      { رقم_البلاغ: 3150, اسم_المشروع: "عقد تنفيذ شبكات صرف صحي بحي الحائر", المقاول: "شركة المسار الحديث المحدودة", المدينة: "مدينة الرياض", الحي: "الحائر", التاريخ: "2026-02-15", التأخير: 213, الحالة: "تحت معالجة المقاول", المدير: "م. تركي الاسمري" },
+      { رقم_البلاغ: 3263, اسم_المشروع: "عقد تنفيذ شبكات صرف صحي بحي الحائر", المقاول: "شركة المسار الحديث المحدودة", المدينة: "مدينة الرياض", الحي: "الحائر", التاريخ: "2026-02-25", التأخير: 203, الحالة: "تحت معالجة المقاول", المدير: "م. تركي الاسمري" },
+      { رقم_البلاغ: 15063, اسم_المشروع: "عقد تنفيذ شبكة صرف صحى بحى المعيزلية - المرحلة الأولى", المقاول: "شركة نظم البيئة للمقاولات", المدينة: "مدينة الرياض", الحي: "المعيزلية", التاريخ: "2026-06-08", التأخير: 100, الحالة: "تحت معالجة المقاول", المدير: "م. عسكر لسوم" },
+      { رقم_البلاغ: 15440, اسم_المشروع: "عقد تنفيذ شبكات الصرف الصحي بأجزاء من أحياء القدس والملك عبد الله", المقاول: "شركة ربوة التعمير(راكو) للمقاولات", المدينة: "مدينة الرياض", الحي: "القدس", التاريخ: "2026-06-22", التأخير: 86, الحالة: "تحت معالجة المقاول", المدير: "م. عسكر لسوم" },
+      { رقم_البلاغ: 16579, اسم_المشروع: "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", المقاول: "شركة نظم البيئة للمقاولات", المدينة: "مدينة الرياض", الحي: "العوالي", التاريخ: "2026-07-20", التأخير: 58, الحالة: "بانتظار اعتماد الجهة المتعدية", المدير: "م. امجد الفالح" },
+      { رقم_البلاغ: 17783, اسم_المشروع: "عقد تنفيذ شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", المقاول: "شركة نظم البيئة للمقاولات", المدينة: "مدينة الرياض", الحي: "العوالي", التاريخ: "2026-08-23", التأخير: 24, الحالة: "تحت معالجة المقاول", المدير: "م. امجد الفالح" },
+      { رقم_البلاغ: 17882, اسم_المشروع: "عقد تنفيذ شبكات الصرف الصحي بحي العوالي (مرحلة أولى)", المقاول: "شركة الأعمال المدنية المحدودة", المدينة: "مدينة الرياض", الحي: "العوالي", التاريخ: "2026-08-24", التأخير: 23, الحالة: "تحت معالجة المقاول", المدير: "م. امجد الفالح" },
+      { رقم_البلاغ: 3369, اسم_المشروع: "عقد تنفيذ شبكات المياه بحي المهدية (عقد رقم 3)بمدينة الرياض", المقاول: "شركة الدايل العالمية المحدودة", المدينة: "مدينة الرياض", الحي: "المهدية", التاريخ: "2026-03-03", التأخير: 197, الحالة: "تحت معالجة المقاول", المدير: "م. عبدالله العنزي" },
+      { رقم_البلاغ: 806, اسم_المشروع: "عقد استكمال مشاريع المياه بمحافظتي شقراء ومرات (المرحلة الاولي)", المقاول: "شركة ضيف الله العتيبي للمقاولات", المدينة: "شقراء", الحي: "الرحاب", التاريخ: "2025-08-20", التأخير: 392, الحالة: "تحت معالجة المقاول", المدير: "م. سعيد الحارث" },
+      { رقم_البلاغ: 883, اسم_المشروع: "عقد تنفيذ شبكات الصرف الصحي بمدينة شقراء ( المرحلة السابعة )", المقاول: "مؤسسة أضواء رتاج للمقاولات", المدينة: "شقراء", الحي: "الياسمين", التاريخ: "2025-08-25", التأخير: 387, الحالة: "تحت معالجة المقاول", المدير: "م. سعيد الحارث" },
+      { رقم_البلاغ: 1809, اسم_المشروع: "عقد تنفيذ و استكمال مشاريع المياه بمحافظة القويعية", المقاول: "شركة ماكسون للمقاولات", المدينة: "الرويضة", الحي: "حي الفلاح", التاريخ: "2025-11-20", التأخير: 300, الحالة: "تحت معالجة المقاول", المدير: "م. سعيد الحارث" },
+      { رقم_البلاغ: 17844, اسم_المشروع: "عقد استكمال مشاريع المياه بمدينة الدوادمي ومراكز البجادية ونفي", المقاول: "شركة مشروعات المياه والطاقة للمقاولات", المدينة: "الدوادمي", الحي: "الخالدية", التاريخ: "2026-08-24", التأخير: 23, الحالة: "تحت معالجة المقاول", المدير: "م. سعيد الحارث" }
+    ];
 
-    window.addEventListener('DOMContentLoaded', loadDataFromJSON);
+    window.onload = () => {
+      updateDashboard(defaultData);
+    };
 
-    function loadStoredData() {
-      const stored = localStorage.getItem('nwc_encroachments_data');
-      if (stored) {
-        try { currentData = JSON.parse(stored); }
-        catch(e) { currentData = JSON.parse(JSON.stringify(defaultData)); }
-      } else {
-        currentData = JSON.parse(JSON.stringify(defaultData));
-      }
-    }
-
-    function saveData() {
-      localStorage.setItem('nwc_encroachments_data', JSON.stringify(currentData));
-    }
-
-    function resetToDefaults() {
-      if (confirm('هل أنت متأكد من استعادة البلاغات المعتمدة الافتراضية؟')) {
-        currentData = JSON.parse(JSON.stringify(defaultData));
-        saveData();
-        document.getElementById('uploadFileName').innerText = 'تمت استعادة البيانات الافتراضية';
-        renderAll();
-        showToast('تمت استعادة البيانات الافتراضية بنجاح!');
-      }
-    }
-
-    function initOpenStreetMap() {
-      map = L.map('map').setView([24.7136, 46.6753], 8);
-      const osmStandard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
-      const osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap HOT'
-      });
-      L.control.layers({
-        "خريطة قياسية": osmStandard,
-        "خريطة تضاريس": osmHot
-      }).addTo(map);
-      setTimeout(() => { map.invalidateSize(); }, 300);
-    }
-
-    function populateProjectDatalist() {
-      const dl = document.getElementById('projectOptions');
-      dl.innerHTML = '';
-      projectsCatalog.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.name;
-        opt.innerText = `${p.contractor} (${p.pm})`;
-        dl.appendChild(opt);
-      });
-    }
-
-    function getFilteredData() {
-      return currentData.filter(item => {
-        let matchTab = true;
-        if (activeFilter === 'riyadh') {
-          matchTab = (item.المدينة === 'مدينة الرياض') && item.حالة_البلاغ !== 'تمت المعالجة';
-        } else if (activeFilter === 'govs') {
-          matchTab = (item.المدينة !== 'مدينة الرياض') && item.حالة_البلاغ !== 'تمت المعالجة';
-        } else if (activeFilter === 'resolved') {
-          matchTab = item.حالة_البلاغ === 'تمت المعالجة';
-        } else if (activeFilter === 'all') {
-          matchTab = item.حالة_البلاغ !== 'تمت المعالجة';
-        }
-        let matchSearch = true;
-        if (searchQuery.trim() !== '') {
-          const q = searchQuery.toLowerCase();
-          const targetStr = `${item.رقم_بلاغ_التعدي} ${item.name} ${item.contractor} ${item.المدينة} ${item.الحي} ${item.program_manager_nwc} ${item.حالة_البلاغ}`.toLowerCase();
-          matchSearch = targetStr.includes(q);
-        }
-        return matchTab && matchSearch;
-      });
-    }
-
-    function renderAll() {
-      const filtered = getFilteredData();
-      updateKPIs();
-      renderMapMarkers(filtered);
-      renderCards(filtered);
-      renderTable(filtered);
-      updateCharts();
-    }
-
-    function updateKPIs() {
-      const pendingItems = currentData.filter(i => i.حالة_البلاغ !== 'تمت المعالجة');
-      const underContractor = currentData.filter(i => i.حالة_البلاغ === 'تحت معالجة المقاول');
-      const underReview = currentData.filter(i => i.حالة_البلاغ === 'بانتظار اعتماد الجهة المتعدية');
-      const resolved = currentData.filter(i => i.حالة_البلاغ === 'تمت المعالجة');
-      const riyadhCount = pendingItems.filter(i => i.المدينة === 'مدينة الرياض').length;
-      const govsCount = pendingItems.filter(i => i.المدينة !== 'مدينة الرياض').length;
-
-      document.getElementById('kpiTotal').innerText = pendingItems.length;
-      document.getElementById('kpiSubLoc').innerText = `${riyadhCount} الرياض + ${govsCount} المحافظات`;
-      document.getElementById('kpiContractor').innerText = underContractor.length;
-      document.getElementById('kpiReview').innerText = underReview.length;
-      document.getElementById('kpiResolved').innerText = resolved.length;
-      document.getElementById('countAll').innerText = pendingItems.length;
-      document.getElementById('countRiyadh').innerText = riyadhCount;
-      document.getElementById('countGovs').innerText = govsCount;
-      document.getElementById('countResolved').innerText = resolved.length;
-      document.getElementById('activeCountBadge').innerText = `${pendingItems.length} بلاغاً معتمداً`;
-      document.getElementById('printTableCount').innerText = `إجمالي البلاغات: ${pendingItems.length} بلاغاً معتمداً`;
-
-      if (pendingItems.length > 0) {
-        let totalDays = 0;
-        pendingItems.forEach(i => {
-          const bDate = new Date(i.تاريخ_البلاغ);
-          const days = Math.max(0, Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24)));
-          totalDays += days;
-        });
-        document.getElementById('kpiAvgDays').innerText = Math.round(totalDays / pendingItems.length);
-      } else {
-        document.getElementById('kpiAvgDays').innerText = '0';
-      }
-    }
-
-    function renderMapMarkers(data) {
-      markers.forEach(m => map.removeLayer(m));
-      markers = [];
-      data.forEach(item => {
-        if (item.خط_العرض && item.خط_الطول) {
-          const isResolved = (item.حالة_البلاغ === 'تمت المعالجة');
-          const bDate = new Date(item.تاريخ_البلاغ);
-          const diffDays = Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24));
-          const marker = L.marker([item.خط_العرض, item.خط_الطول]).addTo(map);
-          marker.bindPopup(`
-            <div style="font-family:'Cairo'; direction:rtl; text-align:right; font-size:11.5px; min-width:200px;">
-              <strong style="color:#153E4B; font-size:13px;">بلاغ #${item.رقم_بلاغ_التعدي}</strong><br>
-              <span style="color:#168A89; font-weight:700;">${item.name}</span><br>
-              <strong>المقاول:</strong> ${item.contractor}<br>
-              <strong>الموقع:</strong> ${item.المدينة} - ${item.الحي}<br>
-              <strong>الحالة:</strong> ${item.حالة_البلاغ}<br>
-              <strong>أيام التأخير:</strong> ${diffDays} يوم<br>
-              <div style="margin-top:6px; display:flex; gap:4px;">
-                ${!isResolved ? `<button onclick="markResolved(${item.رقم_بلاغ_التعدي})" style="background:#168A89; color:#fff; border:none; padding:2px 8px; border-radius:4px; font-size:10px; cursor:pointer;">✅ تم الحل</button>` : ''}
-                <button onclick="editEncroachment(${item.رقم_بلاغ_التعدي})" style="background:#153E4B; color:#fff; border:none; padding:2px 8px; border-radius:4px; font-size:10px; cursor:pointer;">✏️ تعديل</button>
-              </div>
-            </div>
-          `);
-          markers.push(marker);
-        }
-      });
-      if (markers.length > 0) {
-        const group = new L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.15));
-      }
-    }
-
-    function renderCards(data) {
-      const container = document.getElementById('cardsContainer');
-      container.innerHTML = '';
-      if (data.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">لا توجد بلاغات تطابق الفلتر المحدد</div>';
-        return;
-      }
-      data.forEach(item => {
-        const bDate = new Date(item.تاريخ_البلاغ);
-        const diffDays = Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24));
-        const isResolved = (item.حالة_البلاغ === 'تمت المعالجة');
-        const card = document.createElement('div');
-        card.className = `enc-card ${isResolved ? 'resolved' : ''}`;
-        card.onclick = (e) => {
-          if (e.target.tagName !== 'BUTTON') {
-            if (item.خط_العرض && item.خط_الطول) {
-              map.setView([item.خط_العرض, item.خط_الطول], 14);
-            }
-          }
-        };
-        card.innerHTML = `
-          <div class="enc-header">
-            <span class="enc-badge">بلاغ #${item.رقم_بلاغ_التعدي}</span>
-            <span class="enc-status ${isResolved ? 'green' : ''}">${item.حالة_البلاغ}</span>
-          </div>
-          <div class="enc-proj">${item.name}</div>
-          <div class="enc-meta">
-            <span>🏗️ ${item.contractor}</span>
-            <span>📍 ${item.المدينة} - ${item.الحي}</span>
-            <span>⏱️ ${diffDays} يوم تأخير</span>
-            <span>👔 ${item.program_manager_nwc}</span>
-          </div>
-          <div class="enc-actions">
-            ${!isResolved ? `<button onclick="markResolved(${item.رقم_بلاغ_التعدي})" class="btn btn-success" style="font-size:10px; padding:2px 8px;">✅ تمت المعالجة</button>` : `<button onclick="reopenReport(${item.رقم_بلاغ_التعدي})" class="btn btn-secondary" style="font-size:10px; padding:2px 8px;">🔄 إعادة فتح</button>`}
-            <button onclick="editEncroachment(${item.رقم_بلاغ_التعدي})" class="btn btn-secondary" style="font-size:10px; padding:2px 8px;">✏️ تعديل</button>
-            <button onclick="deleteEncroachment(${item.رقم_بلاغ_التعدي})" class="btn btn-danger" style="font-size:10px; padding:2px 8px;">🗑️ حذف</button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function renderTable(data) {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
-      if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:15px; color:#888;">لا توجد بيانات مطابقة</td></tr>';
-        return;
-      }
-      data.forEach(item => {
-        const bDate = new Date(item.تاريخ_البلاغ);
-        const diffDays = Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24));
-        const isResolved = (item.حالة_البلاغ === 'تمت المعالجة');
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="font-weight:800; color:#153E4B;">${item.رقم_بلاغ_التعدي}</td>
-          <td style="font-weight:700;">${item.name}</td>
-          <td>${item.contractor}</td>
-          <td>${item.المدينة}</td>
-          <td>${item.الحي}</td>
-          <td>${item.تاريخ_البلاغ}</td>
-          <td style="font-weight:800; color:${diffDays > 60 && !isResolved ? '#991B1B' : '#153E4B'};">${diffDays} يوم</td>
-          <td><span style="background:${isResolved ? '#DCFCE7' : '#E2EFEB'}; color:${isResolved ? '#166534' : '#153E4B'}; padding:2px 6px; border-radius:4px; font-weight:700; font-size:10px;">${item.حالة_البلاغ}</span></td>
-          <td>${item.program_manager_nwc}</td>
-          <td class="no-print" style="white-space:nowrap;">
-            ${!isResolved ? `<button onclick="markResolved(${item.رقم_بلاغ_التعدي})" class="btn btn-success" style="font-size:9.5px; padding:2px 6px;" title="تمت المعالجة">✅</button>` : ''}
-            <button onclick="editEncroachment(${item.رقم_بلاغ_التعدي})" class="btn btn-secondary" style="font-size:9.5px; padding:2px 6px;" title="تعديل">✏️</button>
-            <button onclick="deleteEncroachment(${item.رقم_بلاغ_التعدي})" class="btn btn-danger" style="font-size:9.5px; padding:2px 6px;" title="حذف">🗑️</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function filterData(type, el) {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      activeFilter = type;
-      renderAll();
-    }
-
-    function handleTableSearch(e) {
-      searchQuery = e.target.value;
-      renderAll();
-    }
-
-    function markResolved(repId) {
-      const idx = currentData.findIndex(i => i.رقم_بلاغ_التعدي === repId);
-      if (idx !== -1) {
-        currentData[idx].حالة_البلاغ = 'تمت المعالجة';
-        saveData();
-        renderAll();
-        showToast(`تم تغيير حالة البلاغ #${repId} إلى "تمت المعالجة"`);
-      }
-    }
-
-    function reopenReport(repId) {
-      const idx = currentData.findIndex(i => i.رقم_بلاغ_التعدي === repId);
-      if (idx !== -1) {
-        currentData[idx].حالة_البلاغ = 'تحت معالجة المقاول';
-        saveData();
-        renderAll();
-        showToast(`تمت إعادة فتح البلاغ #${repId}`);
-      }
-    }
-
-    function deleteEncroachment(repId) {
-      if (confirm(`هل أنت متأكد من حذف البلاغ #${repId} نهائياً؟`)) {
-        currentData = currentData.filter(i => i.رقم_بلاغ_التعدي !== repId);
-        saveData();
-        renderAll();
-        showToast(`تم حذف البلاغ #${repId} بنجاح`);
-      }
-    }
-
-    function openAddModal() {
-      document.getElementById('modalTitle').innerText = '➕ إضافة بلاغ تعدي جديد';
-      document.getElementById('formEditIndex').value = '-1';
-      document.getElementById('encForm').reset();
-      document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('encModal').classList.add('active');
-    }
-
-    function editEncroachment(repId) {
-      const idx = currentData.findIndex(i => i.رقم_بلاغ_التعدي === repId);
-      if (idx === -1) return;
-      const item = currentData[idx];
-      document.getElementById('modalTitle').innerText = `✏️ تعديل بلاغ #${repId}`;
-      document.getElementById('formEditIndex').value = idx;
-      document.getElementById('formRepId').value = item.رقم_بلاغ_التعدي;
-      document.getElementById('formDate').value = item.تاريخ_البلاغ || '';
-      document.getElementById('formProjName').value = item.name || '';
-      document.getElementById('formContractor').value = item.contractor || '';
-      document.getElementById('formPM').value = item.program_manager_nwc || 'م. عبدالله الأسود';
-      document.getElementById('formCity').value = item.المدينة || 'مدينة الرياض';
-      document.getElementById('formDistrict').value = item.الحي || '';
-      document.getElementById('formLat').value = item.خط_العرض || '';
-      document.getElementById('formLng').value = item.خط_الطول || '';
-      document.getElementById('formStatus').value = item.حالة_البلاغ || 'تحت معالجة المقاول';
-      document.getElementById('formDesc').value = item.وصف_التعدي || '';
-      document.getElementById('encModal').classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('encModal').classList.remove('active');
-    }
-
-    function handleSaveEncroachment(e) {
-      e.preventDefault();
-      const editIdx = parseInt(document.getElementById('formEditIndex').value);
-      const repId = parseInt(document.getElementById('formRepId').value);
-      const projName = document.getElementById('formProjName').value;
-      const contractor = document.getElementById('formContractor').value;
-      const pm = document.getElementById('formPM').value;
-      const city = document.getElementById('formCity').value;
-      const dist = document.getElementById('formDistrict').value;
-      const lat = parseFloat(document.getElementById('formLat').value) || (city === 'مدينة الرياض' ? 24.7136 : 25.2388);
-      const lng = parseFloat(document.getElementById('formLng').value) || (city === 'مدينة الرياض' ? 46.6753 : 45.2775);
-      const status = document.getElementById('formStatus').value;
-      const dateStr = document.getElementById('formDate').value;
-      const desc = document.getElementById('formDesc').value;
-
-      const recordObj = {
-        id: 0,
-        name: projName,
-        contractor: contractor,
-        program_manager_nwc: pm,
-        المدينة: city,
-        المحافظة: city,
-        الحي: dist,
-        خط_العرض: lat,
-        خط_الطول: lng,
-        رقم_بلاغ_التعدي: repId,
-        تاريخ_البلاغ: dateStr,
-        حالة_البلاغ: status,
-        وصف_التعدي: desc
-      };
-
-      if (editIdx === -1) {
-        if (currentData.some(i => i.رقم_بلاغ_التعدي === repId)) {
-          alert(`رقم البلاغ #${repId} موجود مسبقاً!`);
-          return;
-        }
-        currentData.unshift(recordObj);
-        showToast(`تمت إضافة البلاغ #${repId} بنجاح!`);
-      } else {
-        currentData[editIdx] = { ...currentData[editIdx], ...recordObj };
-        showToast(`تم تحديث البلاغ #${repId} بنجاح!`);
-      }
-      saveData();
-      closeModal();
-      renderAll();
-    }
-
-    function handleExcelUpload(event) {
+    function handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      document.getElementById('uploadFileName').innerText = `جاري قراءة: ${file.name}...`;
+
       const reader = new FileReader();
       reader.onload = function(e) {
-        try {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          const rawJson = XLSX.utils.sheet_to_json(worksheet);
-          if (!rawJson || rawJson.length === 0) {
-            alert('الملف المرفوع فارغ!');
-            return;
-          }
-          const parsedRecords = [];
-          rawJson.forEach(row => {
-            const repId = row['رقم بلاغ التعدي'] || row['رقم_بلاغ_التعدي'] || row['رقم البلاغ'] || row['ID'];
-            if (!repId) return;
-            const status = String(row['حالة البلاغ'] || row['حالة_البلاغ'] || 'تحت معالجة المقاول');
-            const contractor = String(row['اسم المقاول'] || row['المقاول المنفذ'] || row['contractor'] || 'غير محدد');
-            const city = String(row['المدينة'] || row['المحافظة'] || 'مدينة الرياض');
-            const district = String(row['الحي'] || row['الموقع'] || 'غير محدد');
-            const dateVal = String(row['تاريخ البلاغ'] || row['تاريخ_البلاغ'] || '2026-01-01').split('T')[0];
-            const lat = parseFloat(row['خط العرض'] || row['خط_العرض']) || (city === 'مدينة الرياض' ? 24.7136 : 25.2388);
-            const lng = parseFloat(row['خط الطول'] || row['خط_الطول']) || (city === 'مدينة الرياض' ? 46.6753 : 45.2775);
-            const desc = String(row['وصف التعدي'] || row['الإجراء المطلوب'] || 'بلاغ تعدي على مشروع جاري');
-            const pm = String(row['مدير البرنامج'] || row['program_manager_nwc'] || 'م. عبدالله الأسود');
-            const projName = String(row['اسم المشروع'] || row['name'] || 'مشروع جاري');
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
-            parsedRecords.push({
-              id: 0,
-              name: projName,
-              contractor: contractor,
-              program_manager_nwc: pm,
-              المدينة: city,
-              المحافظة: city,
-              الحي: district,
-              خط_العرض: lat,
-              خط_الطول: lng,
-              رقم_بلاغ_التعدي: parseInt(repId),
-              تاريخ_البلاغ: dateVal,
-              حالة_البلاغ: status,
-              وصف_التعدي: desc
-            });
-          });
-          if (parsedRecords.length > 0) {
-            currentData = parsedRecords;
-            saveData();
-            document.getElementById('uploadFileName').innerText = `تم استيراد ${parsedRecords.length} بلاغاً بنجاح من ${file.name}`;
-            renderAll();
-            showToast(`✅ تم استيراد ${parsedRecords.length} بلاغاً بنجاح!`);
-          } else {
-            alert('لم يتم العثور على بيانات صالحة في الملف.');
-          }
-        } catch(err) {
-          console.error(err);
-          alert('حدث خطأ أثناء معالجة الملف: ' + err.message);
+        const mappedData = jsonData.map(row => ({
+          رقم_البلاغ: row['رقم_بلاغ_التعدي'],
+          اسم_المشروع: row['name'],
+          المقاول: row['contractor'],
+          المدينة: row['المدينة'],
+          الحي: row['الحي'],
+          التاريخ: row['تاريخ_البلاغ'],
+          التأخير: parseInt(row['age_days']) || 0,
+          الحالة: row['حالة_البلاغ'],
+          المدير: row['program_manager_nwc']
+        })).filter(r => r.رقم_البلاغ);
+
+        if (mappedData.length === 0) {
+          alert("لم يتم العثور على بيانات صالحة. تأكد من رفع الملف الصحيح.");
+          return;
         }
+
+        alert(`تم تحديث البيانات بنجاح! عدد البلاغات: ${mappedData.length}`);
+        updateDashboard(mappedData);
       };
       reader.readAsArrayBuffer(file);
     }
 
-    function exportToExcel() {
-      const exportRows = currentData.map(item => ({
-        'رقم بلاغ التعدي': item.رقم_بلاغ_التعدي,
-        'اسم المشروع': item.name,
-        'المقاول المنفذ': item.contractor,
-        'مدير البرنامج NWC': item.program_manager_nwc,
-        'المدينة / المحافظة': item.المدينة,
-        'الحي / الموقع': item.الحي,
-        'تاريخ البلاغ': item.تاريخ_البلاغ,
-        'حالة البلاغ': item.حالة_البلاغ,
-        'خط العرض': item.خط_العرض,
-        'خط الطول': item.خط_الطول,
-        'وصف التعدي': item.وصف_التعدي || ''
-      }));
-      const ws = XLSX.utils.json_to_sheet(exportRows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "البلاغات المعتمدة");
-      XLSX.writeFile(wb, "بلاغات_المشاريع_الجارية_NWC.xlsx");
-      showToast('تم تصدير ملف الإكسيل بنجاح!');
+    function updateDashboard(data) {
+      const total = data.length;
+      const contractorCount = data.filter(r => r.الحالة && r.الحالة.includes("تحت معالجة")).length;
+      const pendingCount = data.filter(r => r.الحالة && r.الحالة.includes("بانتظار")).length;
+      const avgDays = Math.round(data.reduce((sum, r) => sum + r.التأخير, 0) / total) || 0;
+      const over60Days = data.filter(r => r.التأخير > 60).length;
+
+      document.getElementById('totalDisplayed').textContent = total;
+      document.getElementById('kpiTotal').textContent = total;
+      
+      const riyadhCount = data.filter(r => r.المدينة && r.المدينة.includes("الرياض")).length;
+      const provCount = total - riyadhCount;
+      document.getElementById('kpiTotalSub').textContent = `${riyadhCount} بالرياض + ${provCount} بالمحافظات`;
+      
+      document.getElementById('kpiContractor').textContent = contractorCount;
+      document.getElementById('kpiContractorSub').textContent = Math.round((contractorCount/total)*100) + "% من إجمالي البلاغات";
+      document.getElementById('kpiPending').textContent = pendingCount;
+      document.getElementById('kpiAvgDays').textContent = avgDays;
+      document.getElementById('alertText').textContent = over60Days + " بلاغاً";
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      const sortedData = [...data].sort((a, b) => b.التأخير - a.التأخير);
+      
+      sortedData.forEach(row => {
+        const tr = document.createElement('tr');
+        const isPending = row.الحالة && row.الحالة.includes("بانتظار");
+        tr.innerHTML = `
+          <td>${row.رقم_البلاغ}</td>
+          <td style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${row.اسم_المشروع}">${row.اسم_المشروع}</td>
+          <td>${row.المقاول}</td>
+          <td>${row.المدينة} - ${row.الحي}</td>
+          <td>${row.التاريخ}</td>
+          <td style="font-weight: 700; color: ${row.التأخير > 60 ? '#991B1B' : '#153E4B'}">${row.التأخير} يوم</td>
+          <td><span class="badge-tag ${isPending ? 'pending' : ''}">${row.الحالة}</span></td>
+          <td>${row.المدير}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateCharts(data);
+      updateLocations(data);
+      updateManagers(data);
     }
 
-    function initCharts() {
-      const ctxAge = document.getElementById('ageDoughnutChart').getContext('2d');
-      ageChart = new Chart(ctxAge, {
+    function updateLocations(data) {
+      const locCounts = {};
+      data.forEach(r => {
+        const key = r.المدينة + (r.الحي ? ' - ' + r.الحي : '');
+        locCounts[key] = (locCounts[key] || 0) + 1;
+      });
+
+      const sorted = Object.entries(locCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const max = sorted[0]?.[1] || 1;
+      const container = document.getElementById('locationsContainer');
+      container.innerHTML = '';
+
+      sorted.forEach(([loc, count]) => {
+        const width = (count / max) * 100;
+        container.innerHTML += `
+          <div class="bar-row">
+            <div class="bar-label">${loc}</div>
+            <div class="bar-container"><div class="bar-fill ${count >= 3 ? 'alert' : ''}" style="width: ${width}%;"></div></div>
+            <div class="bar-val">${count}</div>
+          </div>
+        `;
+      });
+    }
+
+    function updateManagers(data) {
+      const mgrCounts = {};
+      data.forEach(r => {
+        mgrCounts[r.المدير] = (mgrCounts[r.المدير] || 0) + 1;
+      });
+
+      const sorted = Object.entries(mgrCounts).sort((a, b) => b[1] - a[1]);
+      const max = sorted[0]?.[1] || 1;
+      const container = document.getElementById('managersContainer');
+      container.innerHTML = '';
+
+      sorted.forEach(([mgr, count]) => {
+        const width = (count / max) * 100;
+        container.innerHTML += `
+          <div class="bar-row">
+            <div class="bar-label">${mgr}</div>
+            <div class="bar-container"><div class="bar-fill ${count >= 4 ? 'alert' : ''}" style="width: ${width}%;"></div></div>
+            <div class="bar-val">${count}</div>
+          </div>
+        `;
+      });
+    }
+
+    function updateCharts(data) {
+      const ageLabels = ['أقل من 30 يوماً', '31 - 60 يوماً', '61 - 120 يوماً', 'أكثر من 120 يوماً'];
+      const ageData = [
+        data.filter(r => r.التأخير <= 30).length,
+        data.filter(r => r.التأخير > 30 && r.التأخير <= 60).length,
+        data.filter(r => r.التأخير > 60 && r.التأخير <= 120).length,
+        data.filter(r => r.التأخير > 120).length
+      ];
+
+      if (ageChartInstance) ageChartInstance.destroy();
+      ageChartInstance = new Chart(document.getElementById('ageChart'), {
         type: 'doughnut',
         data: {
-          labels: ['أقل من 30 يوماً', '31 - 60 يوماً', '61 - 120 يوماً', 'أكثر من 120 يوماً'],
+          labels: ageLabels,
           datasets: [{
-            data: [4, 2, 4, 7],
+            data: ageData,
             backgroundColor: ['#168A89', '#E2EFEB', '#153E4B', '#991B1B'],
-            borderColor: '#EEF3EF',
+            borderColor: '#FBF8F0',
             borderWidth: 2
           }]
         },
@@ -1010,59 +468,38 @@
           }
         }
       });
-      const ctxPM = document.getElementById('pmBarChart').getContext('2d');
-      pmChart = new Chart(ctxPM, {
+
+      const contCounts = {};
+      data.forEach(r => {
+        const name = r.المقاول.split(' ')[0] + ' ' + (r.المقاول.split(' ')[1] || '');
+        contCounts[name] = (contCounts[name] || 0) + 1;
+      });
+
+      const sortedCont = Object.entries(contCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+      if (contractorChartInstance) contractorChartInstance.destroy();
+      contractorChartInstance = new Chart(document.getElementById('contractorChart'), {
         type: 'bar',
         data: {
-          labels: ['م. عبدالله الأسود', 'م. سعيد الحارث', 'م. تركي الاسمري', 'م. أمجد الفالح', 'م. عسكر لسوم', 'م. عبدالله العنزي'],
+          labels: sortedCont.map(c => c[0]),
           datasets: [{
             label: 'عدد البلاغات',
-            data: [4, 4, 3, 3, 2, 1],
+            data: sortedCont.map(c => c[1]),
             backgroundColor: '#168A89',
             borderRadius: 4
           }]
         },
         options: {
+          indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { ticks: { font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } },
-            y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } }
+            x: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } },
+            y: { ticks: { font: { family: 'Cairo', size: 9 }, color: '#153E4B' } }
           },
           plugins: { legend: { display: false } }
         }
       });
-    }
-
-    function updateCharts() {
-      if (!ageChart || !pmChart) return;
-      const activeItems = currentData.filter(i => i.حالة_البلاغ !== 'تمت المعالجة');
-      let c1 = 0, c2 = 0, c3 = 0, c4 = 0;
-      activeItems.forEach(i => {
-        const bDate = new Date(i.تاريخ_البلاغ);
-        const diffDays = Math.floor((baseCalculationDate - bDate) / (1000 * 60 * 60 * 24));
-        if (diffDays <= 30) c1++;
-        else if (diffDays <= 60) c2++;
-        else if (diffDays <= 120) c3++;
-        else c4++;
-      });
-      ageChart.data.datasets[0].data = [c1, c2, c3, c4];
-      ageChart.update();
-      const pmCounts = {};
-      activeItems.forEach(i => {
-        const pm = i.program_manager_nwc || 'غير محدد';
-        pmCounts[pm] = (pmCounts[pm] || 0) + 1;
-      });
-      pmChart.data.labels = Object.keys(pmCounts);
-      pmChart.data.datasets[0].data = Object.values(pmCounts);
-      pmChart.update();
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toastMsg');
-      t.innerText = msg;
-      t.classList.add('show');
-      setTimeout(() => { t.classList.remove('show'); }, 3000);
     }
   </script>
 </body>
