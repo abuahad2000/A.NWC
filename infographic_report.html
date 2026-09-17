@@ -23,8 +23,8 @@
       font-family: 'Cairo', sans-serif;
       background-color: #FBF8F0;
       color: #153E4B;
-      line-height: 1.25;
-      font-size: 11px;
+      line-height: 1.4;
+      font-size: 13px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -35,42 +35,42 @@
       width: 210mm;
       height: 297mm;
       background: #FBF8F0;
-      padding: 9mm 10mm;
+      padding: 10mm 12mm;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
     
     /* Header */
     .header {
       border-bottom: 2px solid #D8E2DF;
-      padding-bottom: 6px;
+      padding-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .header-titles h1 {
-      font-size: 17px;
+      font-size: 20px;
       font-weight: 900;
       color: #153E4B;
       letter-spacing: -0.3px;
     }
     .header-titles h2 {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
       color: #168A89;
-      margin-top: 2px;
+      margin-top: 3px;
     }
     .header-badge {
       background-color: #E2EFEB;
       border: 1px solid #168A89;
       color: #153E4B;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 6px;
       font-weight: 700;
-      font-size: 10px;
+      font-size: 11px;
       text-align: left;
     }
     
@@ -78,14 +78,14 @@
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin: 6px 0;
+      gap: 8px;
+      margin: 8px 0;
     }
     .kpi-card {
       background: #EEF3EF;
       border: 1px solid #D8E2DF;
       border-radius: 6px;
-      padding: 6px;
+      padding: 8px;
       text-align: center;
       border-top: 3px solid #168A89;
     }
@@ -93,18 +93,18 @@
       border-top: 3px solid #153E4B;
     }
     .kpi-title {
-      font-size: 9.5px;
+      font-size: 11px;
       font-weight: 700;
       color: #168A89;
     }
     .kpi-value {
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 900;
       color: #153E4B;
-      margin: 1px 0;
+      margin: 2px 0;
     }
     .kpi-sub {
-      font-size: 8.5px;
+      font-size: 10px;
       color: #555;
     }
 
@@ -112,7 +112,7 @@
     .content-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      gap: 8px;
       flex: 1;
     }
     
@@ -120,7 +120,7 @@
       background: #EEF3EF;
       border: 1px solid #D8E2DF;
       border-radius: 6px;
-      padding: 6px 8px;
+      padding: 8px 10px;
       display: flex;
       flex-direction: column;
     }
@@ -128,15 +128,15 @@
       grid-column: span 2;
     }
     .panel-title {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 800;
       color: #153E4B;
       border-bottom: 1px solid #D8E2DF;
-      padding-bottom: 3px;
-      margin-bottom: 5px;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
     .panel-title span {
       color: #168A89;
@@ -147,8 +147,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 4px;
-      font-size: 9.5px;
+      margin-bottom: 5px;
+      font-size: 11px;
     }
     .bar-label {
       width: 48%;
@@ -160,7 +160,7 @@
     .bar-container {
       width: 38%;
       background: #E2EFEB;
-      height: 7px;
+      height: 8px;
       border-radius: 4px;
       overflow: hidden;
     }
@@ -178,28 +178,21 @@
       color: #153E4B;
     }
 
-    /* Sub-panels split */
-    .split-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px;
-    }
-
     /* Mini Table */
     .mini-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 8.5px;
+      font-size: 10.5px;
     }
     .mini-table th {
       background-color: #153E4B;
       color: #FFFFFF;
-      padding: 3px 4px;
+      padding: 4px 5px;
       text-align: right;
       font-weight: 700;
     }
     .mini-table td {
-      padding: 3px 4px;
+      padding: 4px 5px;
       border-bottom: 1px solid #D8E2DF;
       color: #153E4B;
     }
@@ -208,9 +201,9 @@
     }
     .badge-tag {
       display: inline-block;
-      padding: 1px 4px;
+      padding: 2px 5px;
       border-radius: 3px;
-      font-size: 8px;
+      font-size: 9.5px;
       font-weight: 700;
       background: #E2EFEB;
       color: #153E4B;
@@ -219,11 +212,11 @@
     /* Footer */
     .footer {
       border-top: 1px solid #D8E2DF;
-      padding-top: 4px;
+      padding-top: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 8.5px;
+      font-size: 10px;
       color: #168A89;
       font-weight: 600;
     }
@@ -235,18 +228,42 @@
       background: #153E4B;
       color: #FFF;
       border: none;
-      padding: 8px 16px;
+      padding: 10px 18px;
       border-radius: 6px;
-      font-family: 'Cairo';
+      font-family: 'Cairo', sans-serif;
       font-weight: 700;
+      font-size: 14px;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       z-index: 9999;
     }
+    .btn-print:hover {
+      background: #168A89;
+    }
+
     @media print {
-      .btn-print { display: none; }
-      body { background: transparent; min-height: auto; }
-      .page-container { width: 100%; height: 100%; padding: 7mm 8mm; }
+      .btn-print { display: none !important; }
+      body { 
+        background: transparent; 
+        min-height: auto; 
+        display: block;
+        font-size: 14px !important;
+      }
+      .page-container { 
+        width: 210mm; 
+        height: 297mm; 
+        padding: 10mm 12mm; 
+        margin: 0 auto;
+        overflow: visible;
+        display: flex;
+      }
+      .mini-table { font-size: 10.5px !important; }
+      .mini-table th, .mini-table td { padding: 4px 5px !important; }
+      .kpi-value { font-size: 24px !important; }
+      .panel-title { font-size: 13px !important; }
+      .bar-row { font-size: 11px !important; }
+      .header-titles h1 { font-size: 20px !important; }
+      .header-titles h2 { font-size: 13px !important; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -264,7 +281,7 @@
         <h2>📊 تقرير البلاغات المعلقة للمشاريع الرأسمالية (مدينة الرياض والمحافظات)</h2>
       </div>
       <div class="header-badge">
-        <div>تاريخ التحديث: 16 سبتمبر 2026</div>
+        <div>تاريخ التحديث: 17 سبتمبر 2026</div>
         <div>النطاق: 10 مدراء برامج (100% مدقق)</div>
       </div>
     </div>
@@ -300,7 +317,7 @@
       <div class="panel">
         <div class="panel-title">📍 أكثر المواقع تسجيلاً للبلاغات المعلقة (الأكثر فقط)</div>
         
-        <div style="font-size: 8.5px; font-weight: 800; color: #168A89; margin-bottom: 2px;">🏙️ أحياء مدينة الرياض:</div>
+        <div style="font-size: 10px; font-weight: 800; color: #168A89; margin-bottom: 3px;">🏙️ أحياء مدينة الرياض:</div>
         <div class="bar-row">
           <div class="bar-label">حي العوالي (غرب الرياض)</div>
           <div class="bar-container"><div class="bar-fill alert" style="width: 100%;"></div></div>
@@ -317,7 +334,7 @@
           <div class="bar-val">1 لكل حي</div>
         </div>
 
-        <div style="font-size: 8.5px; font-weight: 800; color: #168A89; margin: 4px 0 2px 0; border-top: 1px dashed #D8E2DF; padding-top: 2px;">🏜️ المحافظات التابعة لمنطقة الرياض:</div>
+        <div style="font-size: 10px; font-weight: 800; color: #168A89; margin: 6px 0 3px 0; border-top: 1px dashed #D8E2DF; padding-top: 3px;">🏜️ المحافظات التابعة لمنطقة الرياض:</div>
         <div class="bar-row">
           <div class="bar-label">محافظة شقراء (الرحاب والياسمين)</div>
           <div class="bar-container"><div class="bar-fill alert" style="width: 66%;"></div></div>
@@ -338,10 +355,10 @@
       <!-- 2. Time Distribution & Threshold Alert -->
       <div class="panel">
         <div class="panel-title">⏳ التوزيع الزمني للبلاغات المعلقة وإغلاق المنصة</div>
-        <div style="height: 110px; position: relative;">
+        <div style="height: 130px; position: relative;">
           <canvas id="ageChart"></canvas>
         </div>
-        <div style="font-size: 8px; color: #153E4B; background: #E2EFEB; padding: 3px; border-radius: 4px; margin-top: 3px; text-align: center;">
+        <div style="font-size: 9.5px; color: #153E4B; background: #E2EFEB; padding: 4px; border-radius: 4px; margin-top: 5px; text-align: center; line-height: 1.3;">
           ⚠️ <strong>تنبيه الإقفال:</strong> 11 بلاغاً تجاوزت مهلة الشهرين (60 يوماً) وتتطلب إجراءً فورياً لتفادي إيقاف المنصة.
         </div>
       </div>
@@ -381,7 +398,7 @@
           <div class="bar-val">1 بلاغ</div>
         </div>
 
-        <div style="font-size: 8px; color: #168A89; font-weight: 700; margin-top: 3px; border-top: 1px solid #D8E2DF; padding-top: 2px;">
+        <div style="font-size: 9.5px; color: #168A89; font-weight: 700; margin-top: 5px; border-top: 1px solid #D8E2DF; padding-top: 3px;">
           🏢 <strong>الاستشاري المشرف:</strong> مكتب الياردة للإستشارات الهندسية (17 بلاغاً - 100%).
         </div>
       </div>
@@ -389,13 +406,13 @@
       <!-- 4. Top Delayed Contractors -->
       <div class="panel">
         <div class="panel-title">🚧 المقاولون المتأخرون (بحد أقصى شهرين / أكثر من شهرين)</div>
-        <div style="height: 115px; position: relative;">
+        <div style="height: 130px; position: relative;">
           <canvas id="contractorChart"></canvas>
         </div>
       </div>
 
       <!-- 5. Full Verified Encroachments Table (Summary View) -->
-      <div class="panel full-width" style="max-height: 250px;">
+      <div class="panel full-width">
         <div class="panel-title">📋 جدول البلاغات المعلقة المعتمدة للمشاريع الجارية (17 بلاغاً معتمداً)</div>
         <div style="overflow-x: auto;">
           <table class="mini-table">
@@ -439,7 +456,7 @@
     <!-- Footer -->
     <div class="footer">
       <div>🏢 شركة المياه الوطنية | وحدة التعديات وحماية الأصول الرأسمالية</div>
-      <div>نظام الحوكمة والربط المكاني 100% | التاريخ: 16 سبتمبر 2026</div>
+      <div>نظام الحوكمة والربط المكاني 100% | التاريخ: 17 سبتمبر 2026</div>
       <div><strong>إعداد: عبدالله الزغيبي - التعديات والحوادث</strong></div>
     </div>
 
@@ -464,7 +481,7 @@
         plugins: {
           legend: {
             position: 'right',
-            labels: { font: { family: 'Cairo', size: 8.5 }, boxWidth: 10, color: '#153E4B' }
+            labels: { font: { family: 'Cairo', size: 9 }, boxWidth: 10, color: '#153E4B' }
           }
         }
       }
@@ -486,8 +503,8 @@
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          x: { ticks: { font: { family: 'Cairo', size: 7.5 }, color: '#153E4B' } },
-          y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Cairo', size: 7.5 }, color: '#153E4B' } }
+          x: { ticks: { font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } },
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } }
         },
         plugins: {
           legend: { display: false }
