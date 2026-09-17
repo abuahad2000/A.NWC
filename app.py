@@ -9,12 +9,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import io
 
-# Vercel entrypoint compatibility
-def handler(*args, **kwargs):
-    return {"statusCode": 200, "body": "NWC Portal Active"}
-app = handler
-application = handler
-
 # Page Config
 st.set_page_config(
     page_title="بوابة حوكمة وتعديات مشاريع NWC",
