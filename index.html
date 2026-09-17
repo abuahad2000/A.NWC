@@ -482,42 +482,54 @@
     // 🛠️ دوال مساعدة
     // ==========================================================
     function parseExcelDate(value) {
-      if (!value) return null;
-      
-      // إذا كان رقماً (Excel serial number)
-      if (typeof value === 'number') {
-        const excelEpoch = new Date(1899, 11, 30);
-        return new Date(excelEpoch.getTime() + value * 86400000);
-      }
-      
-      // إذا كان نصاً
-      if (typeof value === 'string') {
-        // محاولة صيغة M/D/YY H:MM
-        const parts = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
-        if (parts) {
-          const month = parseInt(parts[1]) - 1;
-          const day = parseInt(parts[2]);
-          let year = parseInt(parts[3]);
-          if (year < 100) year += 2000;
-          return new Date(year, month, day);
-        }
-        
-        // محاولة صيغة YYYY-MM-DD
-        const d = new Date(value);
-        if (!isNaN(d.getTime())) return d;
-      }
-      
-      return null;
+  if (!value) return null;
+  
+  // إذا كان كائن Date بالفعل (من cellDates: true)
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return value;
+  }
+  
+  // إذا كان رقماً (Excel serial number)
+  if (typeof value === 'number') {
+    const excelEpoch = new Date(1899, 11, 30);
+    return new Date(excelEpoch.getTime() + Math.floor(value) * 86400000);
+  }
+  
+  // إذا كان نصاً
+  if (typeof value === 'string') {
+    // هل هو رقم Excel تسلسلي كنص؟ (مثل "45764.73")
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue > 40000 && numValue < 60000) {
+      const excelEpoch = new Date(1899, 11, 30);
+      return new Date(excelEpoch.getTime() + Math.floor(numValue) * 86400000);
     }
+    
+    // صيغة M/D/YY أو M/D/YYYY
+    const parts = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+    if (parts) {
+      const month = parseInt(parts[1]) - 1;
+      const day = parseInt(parts[2]);
+      let year = parseInt(parts[3]);
+      if (year < 100) year += 2000;
+      return new Date(year, month, day);
+    }
+    
+    // صيغة YYYY-MM-DD
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) return d;
+  }
+  
+  return null;
+}
 
-    function formatDate(value) {
-      const d = parseExcelDate(value);
-      if (!d) return value || '-';
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    }
+function formatDate(value) {
+  const d = parseExcelDate(value);
+  if (!d) return '-';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
     // ==========================================================
     // 📊 دوال تحديث الواجهة
