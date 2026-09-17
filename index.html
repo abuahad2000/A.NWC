@@ -617,68 +617,113 @@
     }
 
     function updateCharts(data) {
-      const ageLabels = ['أقل من 30 يوماً', '31 - 60 يوماً', '61 - 120 يوماً', 'أكثر من 120 يوماً'];
-      const ageData = [
-        data.filter(r => (r.التأخير || 0) <= 30).length,
-        data.filter(r => (r.التأخير || 0) > 30 && (r.التأخير || 0) <= 60).length,
-        data.filter(r => (r.التأخير || 0) > 60 && (r.التأخير || 0) <= 120).length,
-        data.filter(r => (r.التأخير || 0) > 120).length
-      ];
+  // ========================================
+  // 1️⃣ الرسم البياني الزمني (Doughnut)
+  // ========================================
+  const ageLabels = ['أقل من 30 يوماً', '31 - 60 يوماً', '61 - 120 يوماً', 'أكثر من 120 يوماً'];
+  const ageData = [
+    data.filter(r => (r.التأخير || 0) <= 30).length,
+    data.filter(r => (r.التأخير || 0) > 30 && (r.التأخير || 0) <= 60).length,
+    data.filter(r => (r.التأخير || 0) > 60 && (r.التأخير || 0) <= 120).length,
+    data.filter(r => (r.التأخير || 0) > 120).length
+  ];
 
-      if (ageChartInstance) ageChartInstance.destroy();
-      ageChartInstance = new Chart(document.getElementById('ageChart'), {
-        type: 'doughnut',
-        data: {
-          labels: ageLabels,
-          datasets: [{
-            data: ageData,
-            backgroundColor: ['#168A89', '#E2EFEB', '#153E4B', '#991B1B'],
-            borderColor: '#FBF8F0',
-            borderWidth: 2
-          }]
+  if (ageChartInstance) ageChartInstance.destroy();
+  ageChartInstance = new Chart(document.getElementById('ageChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ageLabels,
+      datasets: [{
+        data: ageData,
+        backgroundColor: ['#168A89', '#E2EFEB', '#153E4B', '#991B1B'],
+        borderColor: '#FBF8F0',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          position: 'right', 
+          labels: { 
+            font: { family: 'Cairo', size: 9 }, 
+            boxWidth: 10, 
+            color: '#153E4B' 
+          } 
+        }
+      }
+    }
+  });
+
+  // ========================================
+  // 2️⃣ رسم المقاولين (Bar أفقي) - ✅ تم الإصلاح
+  // ========================================
+  const contCounts = {};
+  data.forEach(r => {
+    if (!r.المقاول) return;
+    const parts = r.المقاول.split(' ');
+    const shortName = parts.slice(0, Math.min(3, parts.length)).join(' ');
+    contCounts[shortName] = (contCounts[shortName] || 0) + 1;
+  });
+
+  // ✅ أخذ أعلى 6 مقاولين فقط
+  const sortedCont = Object.entries(contCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+
+  // ✅ حساب الحد الأقصى للقيم لتحديد max للمحور
+  const maxValue = sortedCont.length > 0 ? Math.max(...sortedCont.map(c => c[1])) : 10;
+
+  if (contractorChartInstance) contractorChartInstance.destroy();
+  contractorChartInstance = new Chart(document.getElementById('contractorChart'), {
+    type: 'bar',
+    data: {
+      labels: sortedCont.map(c => c[0]),
+      datasets: [{
+        label: 'عدد البلاغات',
+        data: sortedCont.map(c => c[1]),
+        backgroundColor: '#168A89',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { 
+          beginAtZero: true, 
+          // ✅ إزالة stepSize: 1 وإضافة max لتجنب التحذير
+          max: maxValue + 2,
+          ticks: { 
+            stepSize: 1,
+            font: { family: 'Cairo', size: 8.5 }, 
+            color: '#153E4B' 
+          },
+          grid: { color: '#E2EFEB' }
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'right', labels: { font: { family: 'Cairo', size: 9 }, boxWidth: 10, color: '#153E4B' } }
+        y: { 
+          ticks: { 
+            font: { family: 'Cairo', size: 9 }, 
+            color: '#153E4B' 
+          },
+          grid: { display: false }
+        }
+      },
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `عدد البلاغات: ${context.raw}`;
+            }
           }
         }
-      });
-
-      const contCounts = {};
-      data.forEach(r => {
-        const parts = r.المقاول.split(' ');
-        const shortName = parts.slice(0, Math.min(3, parts.length)).join(' ');
-        contCounts[shortName] = (contCounts[shortName] || 0) + 1;
-      });
-
-      const sortedCont = Object.entries(contCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
-
-      if (contractorChartInstance) contractorChartInstance.destroy();
-      contractorChartInstance = new Chart(document.getElementById('contractorChart'), {
-        type: 'bar',
-        data: {
-          labels: sortedCont.map(c => c[0]),
-          datasets: [{
-            label: 'عدد البلاغات',
-            data: sortedCont.map(c => c[1]),
-            backgroundColor: '#168A89',
-            borderRadius: 4
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } },
-            y: { ticks: { font: { family: 'Cairo', size: 9 }, color: '#153E4B' } }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
+      }
     }
+  });
+}
   </script>
 </body>
 </html>
