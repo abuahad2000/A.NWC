@@ -2,229 +2,50 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>تقرير إنفوجرافيك البلاغات المعلقة - المشاريع الرأسمالية NWC</title>
+  <title>جدول حوكمة البلاغات التفصيلي - NWC</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
       font-family: 'Cairo', sans-serif;
       background-color: #FBF8F0;
       color: #153E4B;
-      line-height: 1.4;
-      font-size: 13px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      line-height: 1.5;
+      padding: 20px;
     }
     
-    .page-container {
-      width: 210mm;
-      height: 297mm;
-      background: #FBF8F0;
-      padding: 10mm 12mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: visible;
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      overflow: hidden;
     }
     
-    /* Header */
     .header {
+      background: linear-gradient(135deg, #153E4B, #168A89);
+      color: white;
+      padding: 20px 30px;
+    }
+    .header h1 { font-size: 22px; font-weight: 900; margin-bottom: 5px; }
+    .header p { font-size: 13px; opacity: 0.9; }
+    
+    .controls {
+      padding: 15px 30px;
+      background: #EEF3EF;
       border-bottom: 2px solid #D8E2DF;
-      padding-bottom: 8px;
       display: flex;
-      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
       align-items: center;
-    }
-    .header-titles h1 {
-      font-size: 20px;
-      font-weight: 900;
-      color: #153E4B;
-      letter-spacing: -0.3px;
-    }
-    .header-titles h2 {
-      font-size: 13px;
-      font-weight: 700;
-      color: #168A89;
-      margin-top: 3px;
-    }
-    .header-badge {
-      background-color: #E2EFEB;
-      border: 1px solid #168A89;
-      color: #153E4B;
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 11px;
-      text-align: left;
     }
     
-    /* KPI Strip */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin: 8px 0;
-    }
-    .kpi-card {
-      background: #EEF3EF;
-      border: 1px solid #D8E2DF;
-      border-radius: 6px;
-      padding: 8px;
-      text-align: center;
-      border-top: 3px solid #168A89;
-    }
-    .kpi-card.alert {
-      border-top: 3px solid #153E4B;
-    }
-    .kpi-title {
-      font-size: 11px;
-      font-weight: 700;
-      color: #168A89;
-    }
-    .kpi-value {
-      font-size: 22px;
-      font-weight: 900;
-      color: #153E4B;
-      margin: 2px 0;
-    }
-    .kpi-sub {
-      font-size: 10px;
-      color: #555;
-    }
-
-    /* Main Grid Layout */
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      flex: 1;
-    }
-    
-    .panel {
-      background: #EEF3EF;
-      border: 1px solid #D8E2DF;
-      border-radius: 6px;
-      padding: 8px 10px;
-      display: flex;
-      flex-direction: column;
-    }
-    .panel.full-width {
-      grid-column: span 2;
-    }
-    .panel-title {
-      font-size: 13px;
-      font-weight: 800;
-      color: #153E4B;
-      border-bottom: 1px solid #D8E2DF;
-      padding-bottom: 4px;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .panel-title span {
-      color: #168A89;
-    }
-
-    /* Progress & List Elements */
-    .bar-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 5px;
-      font-size: 11px;
-    }
-    .bar-label {
-      width: 48%;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .bar-container {
-      width: 38%;
-      background: #E2EFEB;
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      background: #168A89;
-      height: 100%;
-    }
-    .bar-fill.alert {
-      background: #153E4B;
-    }
-    .bar-val {
-      width: 14%;
-      text-align: left;
-      font-weight: 800;
-      color: #153E4B;
-    }
-
-    /* Mini Table */
-    .mini-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 10.5px;
-    }
-    .mini-table th {
-      background-color: #153E4B;
-      color: #FFFFFF;
-      padding: 4px 5px;
-      text-align: right;
-      font-weight: 700;
-    }
-    .mini-table td {
-      padding: 4px 5px;
-      border-bottom: 1px solid #D8E2DF;
-      color: #153E4B;
-    }
-    .mini-table tr:nth-child(even) {
-      background-color: #FBF8F0;
-    }
-    .badge-tag {
-      display: inline-block;
-      padding: 2px 5px;
-      border-radius: 3px;
-      font-size: 9.5px;
-      font-weight: 700;
-      background: #E2EFEB;
-      color: #153E4B;
-    }
-
-    /* Footer */
-    .footer {
-      border-top: 1px solid #D8E2DF;
-      padding-top: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10px;
-      color: #168A89;
-      font-weight: 600;
-    }
-    
-    .btn-print {
-      position: fixed;
-      top: 10px;
-      left: 10px;
+    .btn {
       background: #153E4B;
       color: #FFF;
       border: none;
@@ -232,285 +53,506 @@
       border-radius: 6px;
       font-family: 'Cairo', sans-serif;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background 0.2s;
     }
-    .btn-print:hover {
-      background: #168A89;
+    .btn:hover { background: #168A89; }
+    .btn-upload { background: #168A89; }
+    .btn-export { background: #0066b3; }
+    .btn-export:hover { background: #00509e; }
+    
+    #fileInput { display: none; }
+    
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      padding: 10px 15px;
+      border: 2px solid #D8E2DF;
+      border-radius: 6px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 13px;
     }
-
+    .search-box:focus { outline: none; border-color: #168A89; }
+    
+    .filter-info {
+      background: #FFF3CD;
+      border: 1px solid #FFC107;
+      padding: 10px 15px;
+      margin: 15px 30px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #856404;
+      display: none;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 15px;
+      padding: 15px 30px;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      flex: 1;
+      min-width: 150px;
+      background: #EEF3EF;
+      border: 1px solid #D8E2DF;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      border-top: 3px solid #168A89;
+    }
+    .stat-value { font-size: 24px; font-weight: 900; color: #153E4B; }
+    .stat-label { font-size: 11px; color: #168A89; font-weight: 700; }
+    
+    .table-wrapper {
+      padding: 0 30px 30px;
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 15px;
+    }
+    
+    thead {
+      background: #153E4B;
+      color: white;
+    }
+    th {
+      padding: 10px 8px;
+      text-align: right;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #D8E2DF;
+      color: #153E4B;
+    }
+    
+    tbody tr:nth-child(even) { background: #FBF8F0; }
+    tbody tr:hover { background: #E2EFEB; }
+    
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-success { background: #D1FAE5; color: #065F46; }
+    .badge-warning { background: #FEF3C7; color: #92400E; }
+    .badge-danger { background: #FEE2E2; color: #991B1B; }
+    .badge-info { background: #DBEAFE; color: #1E40AF; }
+    
+    .delay-cell { font-weight: 700; }
+    .delay-high { color: #991B1B; }
+    .delay-medium { color: #B45309; }
+    .delay-low { color: #065F46; }
+    
+    .actions { display: flex; gap: 5px; }
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      background: #E2EFEB;
+      transition: background 0.2s;
+    }
+    .action-btn:hover { background: #168A89; color: white; }
+    .action-btn.delete:hover { background: #DC2626; }
+    
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 14px;
+    }
+    
     @media print {
-      .btn-print { display: none !important; }
-      body { 
-        background: transparent; 
-        min-height: auto; 
-        display: block;
-        font-size: 14px !important;
-      }
-      .page-container { 
-        width: 210mm; 
-        height: 297mm; 
-        padding: 10mm 12mm; 
-        margin: 0 auto;
-        overflow: visible;
-        display: flex;
-      }
-      .mini-table { font-size: 10.5px !important; }
-      .mini-table th, .mini-table td { padding: 4px 5px !important; }
-      .kpi-value { font-size: 24px !important; }
-      .panel-title { font-size: 13px !important; }
-      .bar-row { font-size: 11px !important; }
-      .header-titles h1 { font-size: 20px !important; }
-      .header-titles h2 { font-size: 13px !important; }
+      .controls, .filter-info { display: none !important; }
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; border-radius: 0; }
+      .header { background: #153E4B !important; -webkit-print-color-adjust: exact; }
+      .actions { display: none !important; }
+      th { background: #153E4B !important; -webkit-print-color-adjust: exact; }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-  <button class="btn-print" onclick="window.print()">🖨️ طباعة الإنفوجرافيك (صفحة A4 واحدة)</button>
-
-  <div class="page-container">
-    
-    <!-- Header -->
-    <div class="header">
-      <div class="header-titles">
-        <h1>🏢 شركة المياه الوطنية (NWC) - القطاع الأوسط</h1>
-        <h2>📊 تقرير البلاغات المعلقة للمشاريع الرأسمالية (مدينة الرياض والمحافظات)</h2>
-      </div>
-      <div class="header-badge">
-        <div>تاريخ التحديث: 17 سبتمبر 2026</div>
-        <div>النطاق: 10 مدراء برامج (100% مدقق)</div>
-      </div>
-    </div>
-
-    <!-- KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-title">📊 إجمالي البلاغات المعلقة</div>
-        <div class="kpi-value">17</div>
-        <div class="kpi-sub">13 بالرياض + 4 بالمحافظات</div>
-      </div>
-      <div class="kpi-card alert">
-        <div class="kpi-title">🔧 تحت معالجة المقاول</div>
-        <div class="kpi-value">16</div>
-        <div class="kpi-sub">94% من إجمالي البلاغات</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-title">📝 بانتظار اعتماد الجهة</div>
-        <div class="kpi-value">1</div>
-        <div class="kpi-sub">حي العوالي (نظم البيئة)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-title">⏱️ متوسط زمن التعليق</div>
-        <div class="kpi-value">148</div>
-        <div class="kpi-sub">يوماً للبلاغ الواحد</div>
-      </div>
-    </div>
-
-    <!-- Content Grid -->
-    <div class="content-grid">
-      
-      <!-- 1. Spatial Breakdown (Districts & Governorates) -->
-      <div class="panel">
-        <div class="panel-title">📍 أكثر المواقع تسجيلاً للبلاغات المعلقة (الأكثر فقط)</div>
-        
-        <div style="font-size: 10px; font-weight: 800; color: #168A89; margin-bottom: 3px;">🏙️ أحياء مدينة الرياض:</div>
-        <div class="bar-row">
-          <div class="bar-label">حي العوالي (غرب الرياض)</div>
-          <div class="bar-container"><div class="bar-fill alert" style="width: 100%;"></div></div>
-          <div class="bar-val">3 بلاغات</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">حي الحائر (جنوب الرياض)</div>
-          <div class="bar-container"><div class="bar-fill alert" style="width: 66%;"></div></div>
-          <div class="bar-val">بلاغان (2)</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">أحياء متفرقة (الياسمين، شبرا، المعيزلية..)</div>
-          <div class="bar-container"><div class="bar-fill" style="width: 33%;"></div></div>
-          <div class="bar-val">1 لكل حي</div>
-        </div>
-
-        <div style="font-size: 10px; font-weight: 800; color: #168A89; margin: 6px 0 3px 0; border-top: 1px dashed #D8E2DF; padding-top: 3px;">🏜️ المحافظات التابعة لمنطقة الرياض:</div>
-        <div class="bar-row">
-          <div class="bar-label">محافظة شقراء (الرحاب والياسمين)</div>
-          <div class="bar-container"><div class="bar-fill alert" style="width: 66%;"></div></div>
-          <div class="bar-val">بلاغان (2)</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">محافظة القويعية (مركز الرويضة)</div>
-          <div class="bar-container"><div class="bar-fill" style="width: 33%;"></div></div>
-          <div class="bar-val">1 بلاغ</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">محافظة الدوادمي (حي الخالدية)</div>
-          <div class="bar-container"><div class="bar-fill" style="width: 33%;"></div></div>
-          <div class="bar-val">1 بلاغ</div>
-        </div>
-      </div>
-
-      <!-- 2. Time Distribution & Threshold Alert -->
-      <div class="panel">
-        <div class="panel-title">⏳ التوزيع الزمني للبلاغات المعلقة وإغلاق المنصة</div>
-        <div style="height: 130px; position: relative;">
-          <canvas id="ageChart"></canvas>
-        </div>
-        <div style="font-size: 9.5px; color: #153E4B; background: #E2EFEB; padding: 4px; border-radius: 4px; margin-top: 5px; text-align: center; line-height: 1.3;">
-          ⚠️ <strong>تنبيه الإقفال:</strong> 11 بلاغاً تجاوزت مهلة الشهرين (60 يوماً) وتتطلب إجراءً فورياً لتفادي إيقاف المنصة.
-        </div>
-      </div>
-
-      <!-- 3. Program Managers Breakdown -->
-      <div class="panel">
-        <div class="panel-title">👔 البلاغات المعلقة حسب مدير البرنامج والاستشاري المشرف</div>
-        
-        <div class="bar-row">
-          <div class="bar-label">م. عبدالله الأسود (المتفرقات)</div>
-          <div class="bar-container"><div class="bar-fill alert" style="width: 100%;"></div></div>
-          <div class="bar-val">4 بلاغات</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">م. سعيد الحارث (المحافظات الغربية)</div>
-          <div class="bar-container"><div class="bar-fill alert" style="width: 100%;"></div></div>
-          <div class="bar-val">4 بلاغات</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">م. تركي الاسمري (جنوب الرياض - صرف)</div>
-          <div class="bar-container"><div class="bar-fill" style="width: 75%;"></div></div>
-          <div class="bar-val">3 بلاغات</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">م. أمجد الفالح (غرب الرياض - صرف)</div>
-          <div class="bar-container"><div class="bar-fill" style="width: 75%;"></div></div>
-          <div class="bar-val">3 بلاغات</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">م. عسكر لسوم (شمال الرياض - صرف)</div>
-          <div class="bar-container"><div class="bar-fill" style="width: 50%;"></div></div>
-          <div class="bar-val">بلاغان (2)</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">م. عبدالله العنزي (غرب الرياض - مياه)</div>
-          <div class="bar-container"><div class="bar-fill" style="width: 25%;"></div></div>
-          <div class="bar-val">1 بلاغ</div>
-        </div>
-
-        <div style="font-size: 9.5px; color: #168A89; font-weight: 700; margin-top: 5px; border-top: 1px solid #D8E2DF; padding-top: 3px;">
-          🏢 <strong>الاستشاري المشرف:</strong> مكتب الياردة للإستشارات الهندسية (17 بلاغاً - 100%).
-        </div>
-      </div>
-
-      <!-- 4. Top Delayed Contractors -->
-      <div class="panel">
-        <div class="panel-title">🚧 المقاولون المتأخرون (بحد أقصى شهرين / أكثر من شهرين)</div>
-        <div style="height: 130px; position: relative;">
-          <canvas id="contractorChart"></canvas>
-        </div>
-      </div>
-
-      <!-- 5. Full Verified Encroachments Table (Summary View) -->
-      <div class="panel full-width">
-        <div class="panel-title">📋 جدول البلاغات المعلقة المعتمدة للمشاريع الجارية (17 بلاغاً معتمداً)</div>
-        <div style="overflow-x: auto;">
-          <table class="mini-table">
-            <thead>
-              <tr>
-                <th>رقم البلاغ</th>
-                <th>اسم المشروع</th>
-                <th>المقاول المنفذ</th>
-                <th>المدينة / الحي</th>
-                <th>تاريخ البلاغ</th>
-                <th>التأخير</th>
-                <th>حالة البلاغ</th>
-                <th>مدير البرنامج</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>3598</td><td>تنفيذ خطوط صرف صحي متفرقة – عقد 26</td><td>مجموعة سعد علي العيسى</td><td>الرياض - الياسمين</td><td>2026-03-17</td><td>183 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. عبدالله الأسود</td></tr>
-              <tr><td>4475</td><td>تنفيذ خطوط صرف صحي متفرقة – عقد 26</td><td>مجموعة سعد علي العيسى</td><td>الرياض - شبرا</td><td>2026-05-07</td><td>132 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. عبدالله الأسود</td></tr>
-              <tr><td>15537</td><td>تنفيذ خطوط صرف صحي متفرقة – عقد 26</td><td>مجموعة سعد علي العيسى</td><td>الرياض - القادسية</td><td>2026-06-24</td><td>84 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. عبدالله الأسود</td></tr>
-              <tr><td>17192</td><td>تنفيذ خطوط صرف صحي متفرقة – عقد 26</td><td>مجموعة سعد علي العيسى</td><td>الرياض - النظيم</td><td>2026-08-08</td><td>39 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. عبدالله الأسود</td></tr>
-              <tr><td>14679</td><td>شبكات صرف صحي بأجزاء من الحزم ونمار</td><td>شركة الخط الذهبي</td><td>الرياض - الحزم</td><td>2026-05-14</td><td>125 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. تركي الاسمري</td></tr>
-              <tr><td>3150</td><td>تنفيذ شبكات صرف صحي بحي الحائر</td><td>شركة المسار الحديث</td><td>الرياض - الحائر</td><td>2026-02-15</td><td>213 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. تركي الاسمري</td></tr>
-              <tr><td>3263</td><td>تنفيذ شبكات صرف صحي بحي الحائر</td><td>شركة المسار الحديث</td><td>الرياض - الحائر</td><td>2026-02-25</td><td>203 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. تركي الاسمري</td></tr>
-              <tr><td>15063</td><td>شبكة صرف صحى بحى المعيزلية - م 1</td><td>شركة نظم البيئة</td><td>الرياض - المعيزلية</td><td>2026-06-08</td><td>100 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. عسكر لسوم</td></tr>
-              <tr><td>15440</td><td>صرف صحي بأجزاء من القدس والملك عبد الله</td><td>شركة ربوة التعمير</td><td>الرياض - القدس</td><td>2026-06-22</td><td>86 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. عسكر لسوم</td></tr>
-              <tr><td>16579</td><td>شبكات الصرف الصحي بحي العوالي - م 2</td><td>شركة نظم البيئة</td><td>الرياض - العوالي</td><td>2026-07-20</td><td>58 يوم</td><td><span class="badge-tag">بانتظار الاعتماد</span></td><td>م. امجد الفالح</td></tr>
-              <tr><td>17783</td><td>شبكات الصرف الصحي بحي العوالي - م 2</td><td>شركة نظم البيئة</td><td>الرياض - العوالي</td><td>2026-08-23</td><td>24 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. امجد الفالح</td></tr>
-              <tr><td>17882</td><td>شبكات الصرف الصحي بحي العوالي - م 1</td><td>شركة الأعمال المدنية</td><td>الرياض - العوالي</td><td>2026-08-24</td><td>23 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. امجد الفالح</td></tr>
-              <tr><td>3369</td><td>شبكات المياه بحي المهدية - عقد 3</td><td>شركة الدايل العالمية</td><td>الرياض - المهدية</td><td>2026-03-03</td><td>197 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. عبدالله العنزي</td></tr>
-              <tr><td>806</td><td>استكمال مشاريع المياه بشقراء ومرات - م 1</td><td>شركة ضيف الله العتيبي</td><td>شقراء - الرحاب</td><td>2025-08-20</td><td>392 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. سعيد الحارث</td></tr>
-              <tr><td>883</td><td>تنفيذ شبكات الصرف الصحي بشقراء - م 7</td><td>مؤسسة أضواء رتاج</td><td>شقراء - الياسمين</td><td>2025-08-25</td><td>387 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. سعيد الحارث</td></tr>
-              <tr><td>1809</td><td>تنفيذ واستكمال مشاريع المياه بالقويعية</td><td>شركة ماكسون للمقاولات</td><td>الرويضة - الفلاح</td><td>2025-11-20</td><td>300 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. سعيد الحارث</td></tr>
-              <tr><td>17844</td><td>استكمال مشاريع المياه بالدوادمي والبجادية</td><td>مشروعات المياه والطاقة</td><td>الدوادمي - الخالدية</td><td>2026-08-24</td><td>23 يوم</td><td><span class="badge-tag">معالجة المقاول</span></td><td>م. سعيد الحارث</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-      <div>🏢 شركة المياه الوطنية | وحدة التعديات وحماية الأصول الرأسمالية</div>
-      <div>نظام الحوكمة والربط المكاني 100% | التاريخ: 17 سبتمبر 2026</div>
-      <div><strong>إعداد: عبدالله الزغيبي - التعديات والحوادث</strong></div>
-    </div>
-
+<div class="container">
+  
+  <div class="header">
+    <h1>📋 جدول حوكمة البلاغات التفصيلي</h1>
+    <p>معد للطباعة والتصدير | المشاريع الرأسمالية الجارية - NWC القطاع الأوسط</p>
   </div>
 
-  <script>
-    // Age Chart
-    new Chart(document.getElementById('ageChart'), {
-      type: 'doughnut',
-      data: {
-        labels: ['أقل من 30 يوماً', '31 - 60 يوماً', '61 - 120 يوماً', 'أكثر من 120 يوماً'],
-        datasets: [{
-          data: [4, 2, 4, 7],
-          backgroundColor: ['#168A89', '#E2EFEB', '#153E4B', '#991B1B'],
-          borderColor: '#FBF8F0',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: { font: { family: 'Cairo', size: 9 }, boxWidth: 10, color: '#153E4B' }
-          }
-        }
-      }
-    });
+  <div class="controls">
+    <label for="fileInput" class="btn btn-upload">📂 رفع ملف التعديات الخام</label>
+    <input type="file" id="fileInput" accept=".xlsx, .xls" onchange="handleFileUpload(event)">
+    <button class="btn btn-export" onclick="exportToExcel()">📤 تصدير Excel</button>
+    <button class="btn" onclick="window.print()">🖨️ طباعة</button>
+    <input type="text" class="search-box" id="searchBox" placeholder="🔍 بحث برقم البلاغ، المشروع، المقاول، الحي..." oninput="filterTable()">
+  </div>
 
-    // Contractor Chart
-    new Chart(document.getElementById('contractorChart'), {
-      type: 'bar',
-      data: {
-        labels: ['سعد العيسى', 'نظم البيئة', 'المسار الحديث', 'أضواء رتاج', 'ضيف الله العتيبي', 'ماكسون', 'الدايل', 'الخط الذهبي', 'الأعمال المدنية', 'ربوة التعمير', 'مشروعات المياه'],
-        datasets: [{
-          label: 'عدد البلاغات',
-          data: [4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1],
-          backgroundColor: '#168A89',
-          borderRadius: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { ticks: { font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } },
-          y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Cairo', size: 8.5 }, color: '#153E4B' } }
-        },
-        plugins: {
-          legend: { display: false }
+  <div id="filterInfo" class="filter-info"></div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value" id="statTotal">17</div>
+      <div class="stat-label">إجمالي البلاغات</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statProcessing">16</div>
+      <div class="stat-label">تحت المعالجة</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statPending">1</div>
+      <div class="stat-label">بانتظار الاعتماد</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statAvgDelay">148</div>
+      <div class="stat-label">متوسط التأخير (يوم)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statCritical">11</div>
+      <div class="stat-label">تجاوز 60 يوم</div>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>رقم البلاغ</th>
+          <th>اسم المشروع</th>
+          <th>المقاول المنفذ</th>
+          <th>المدينة / المحافظة</th>
+          <th>الحي / الشارع</th>
+          <th>تاريخ البلاغ</th>
+          <th>أيام التأخير</th>
+          <th>حالة البلاغ</th>
+          <th>مدير البرنامج</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  // ==========================================================
+  // 🔑 قاعدة البيانات المرجعية (17 بلاغ معتمد)
+  // ==========================================================
+  const APPROVED_PROJECTS = {
+    3598: { اسم_المشروع: "تنفيذ خطوط صرف صحي متفرقة – عقد 26 – المرحلة الثالثة", المقاول: "مجموعة سعد علي العيسى للمقاولات", المدينة: "مدينة الرياض", الحي: "الياسمين", المدير: "م. عبدالله الأسود", التاريخ: "2026-03-17", التأخير: 183, الحالة: "تحت معالجة المقاول" },
+    4475: { اسم_المشروع: "تنفيذ خطوط صرف صحي متفرقة – عقد 26 – المرحلة الثالثة", المقاول: "مجموعة سعد علي العيسى للمقاولات", المدينة: "مدينة الرياض", الحي: "شبرا", المدير: "م. عبدالله الأسود", التاريخ: "2026-05-07", التأخير: 132, الحالة: "تحت معالجة المقاول" },
+    15537: { اسم_المشروع: "تنفيذ خطوط صرف صحي متفرقة – عقد 26 – المرحلة الثالثة", المقاول: "مجموعة سعد علي العيسى للمقاولات", المدينة: "مدينة الرياض", الحي: "القادسية", المدير: "م. عبدالله الأسود", التاريخ: "2026-06-24", التأخير: 84, الحالة: "تحت معالجة المقاول" },
+    17192: { اسم_المشروع: "تنفيذ خطوط صرف صحي متفرقة – عقد 26 – المرحلة الثالثة", المقاول: "مجموعة سعد علي العيسى للمقاولات", المدينة: "مدينة الرياض", الحي: "النظيم", المدير: "م. عبدالله الأسود", التاريخ: "2026-08-08", التأخير: 39, الحالة: "تحت معالجة المقاول" },
+    14679: { اسم_المشروع: "شبكة صرف صحي بأجزاء من الحزم ونمار - المرحلة 3", المقاول: "شركة الخط الذهبي للمقاولات", المدينة: "مدينة الرياض", الحي: "الحزم", المدير: "م. تركي الاسمري", التاريخ: "2026-05-14", التأخير: 125, الحالة: "تحت معالجة المقاول" },
+    3150: { اسم_المشروع: "عقد تنفيذ شبكات صرف صحي بحي الحائر", المقاول: "شركة المسار الحديث المحدودة", المدينة: "مدينة الرياض", الحي: "الحائر", المدير: "م. تركي الاسمري", التاريخ: "2026-02-15", التأخير: 213, الحالة: "تحت معالجة المقاول" },
+    3263: { اسم_المشروع: "عقد تنفيذ شبكات صرف صحي بحي الحائر", المقاول: "شركة المسار الحديث المحدودة", المدينة: "مدينة الرياض", الحي: "الحائر", المدير: "م. تركي الاسمري", التاريخ: "2026-02-25", التأخير: 203, الحالة: "تحت معالجة المقاول" },
+    15063: { اسم_المشروع: "شبكة صرف صحى بحى المعيزلية - المرحلة الأولى", المقاول: "شركة نظم البيئة للمقاولات", المدينة: "مدينة الرياض", الحي: "المعيزلية", المدير: "م. عسكر لسوم", التاريخ: "2026-06-08", التأخير: 100, الحالة: "تحت معالجة المقاول" },
+    15440: { اسم_المشروع: "شبكات الصرف الصحي بأجزاء من القدس والملك عبد الله", المقاول: "شركة ربوة التعمير(راكو) للمقاولات", المدينة: "مدينة الرياض", الحي: "القدس", المدير: "م. عسكر لسوم", التاريخ: "2026-06-22", التأخير: 86, الحالة: "تحت معالجة المقاول" },
+    16579: { اسم_المشروع: "شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", المقاول: "شركة نظم البيئة للمقاولات", المدينة: "مدينة الرياض", الحي: "العوالي", المدير: "م. امجد الفالح", التاريخ: "2026-07-20", التأخير: 58, الحالة: "بانتظار اعتماد الجهة المتعدية" },
+    17783: { اسم_المشروع: "شبكات الصرف الصحي بحي العوالي - مرحلة ثانية", المقاول: "شركة نظم البيئة للمقاولات", المدينة: "مدينة الرياض", الحي: "العوالي", المدير: "م. امجد الفالح", التاريخ: "2026-08-23", التأخير: 24, الحالة: "تحت معالجة المقاول" },
+    17882: { اسم_المشروع: "شبكات الصرف الصحي بحي العوالي - مرحلة أولى", المقاول: "شركة الأعمال المدنية المحدودة", المدينة: "مدينة الرياض", الحي: "العوالي", المدير: "م. امجد الفالح", التاريخ: "2026-08-24", التأخير: 23, الحالة: "تحت معالجة المقاول" },
+    3369: { اسم_المشروع: "شبكات المياه بحي المهدية - عقد 3", المقاول: "شركة الدايل العالمية المحدودة", المدينة: "مدينة الرياض", الحي: "المهدية", المدير: "م. عبدالله العنزي", التاريخ: "2026-03-03", التأخير: 197, الحالة: "تحت معالجة المقاول" },
+    806: { اسم_المشروع: "استكمال مشاريع المياه بشقراء ومرات - المرحلة 1", المقاول: "شركة ضيف الله العتيبي للمقاولات", المدينة: "شقراء", الحي: "الرحاب", المدير: "م. سعيد الحارث", التاريخ: "2025-08-20", التأخير: 392, الحالة: "تحت معالجة المقاول" },
+    883: { اسم_المشروع: "شبكات الصرف الصحي بشقراء - المرحلة 7", المقاول: "مؤسسة أضواء رتاج للمقاولات", المدينة: "شقراء", الحي: "الياسمين", المدير: "م. سعيد الحارث", التاريخ: "2025-08-25", التأخير: 387, الحالة: "تحت معالجة المقاول" },
+    1809: { اسم_المشروع: "تنفيذ واستكمال مشاريع المياه بالقويعية", المقاول: "شركة ماكسون للمقاولات", المدينة: "الرويضة", الحي: "حي الفلاح", المدير: "م. سعيد الحارث", التاريخ: "2025-11-20", التأخير: 300, الحالة: "تحت معالجة المقاول" },
+    17844: { اسم_المشروع: "استكمال مشاريع المياه بالدوادمي والبجادية", المقاول: "شركة مشروعات المياه والطاقة للمقاولات", المدينة: "الدوادمي", الحي: "الخالدية", المدير: "م. سعيد الحارث", التاريخ: "2026-08-24", التأخير: 23, الحالة: "تحت معالجة المقاول" }
+  };
+
+  const APPROVED_IDS = Object.keys(APPROVED_PROJECTS).map(Number);
+
+  let currentData = [];
+
+  // ==========================================================
+  // 🚀 تحميل البيانات الافتراضية عند فتح الصفحة
+  // ==========================================================
+  window.onload = () => {
+    currentData = APPROVED_IDS.map(id => ({
+      رقم_البلاغ: id,
+      ...APPROVED_PROJECTS[id]
+    }));
+    renderTable(currentData);
+    updateStats(currentData);
+  };
+
+  // ==========================================================
+  // 📂 رفع ملف التعديات الخام وتصفيتها
+  // ==========================================================
+  function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array', cellDates: false });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+
+        console.log('📊 إجمالي السجلات:', jsonData.length);
+        console.log('🔍 الأعمدة:', Object.keys(jsonData[0] || {}));
+
+        // ✅ التصفية الصارمة
+        const filteredData = [];
+        const foundIds = new Set();
+
+        jsonData.forEach(row => {
+          // قراءة رقم البلاغ من أي عمود محتمل
+          const rawId = row['رقم البلاغ'] || row['رقم_البلاغ'] || row['id'] || row['رقم_بلاغ_التعدي'];
+          if (!rawId) return;
+          
+          const idNum = parseInt(rawId);
+          if (isNaN(idNum)) return;
+
+          // ✅ التحقق: هل الرقم من الـ 17 المعتمدة؟
+          if (APPROVED_IDS.includes(idNum)) {
+            foundIds.add(idNum);
+            const proj = APPROVED_PROJECTS[idNum];
+
+            // تحويل تاريخ البلاغ
+            const rawDate = row['تاريخ البلاغ'] || row['تاريخ_البلاغ'];
+            const parsedDate = parseExcelDate(rawDate);
+            const formattedDate = parsedDate ? formatDate(parsedDate) : proj.التاريخ;
+
+            // حساب التأخير
+            let delay = proj.التخير;
+            if (parsedDate) {
+              const today = new Date();
+              today.setHours(0,0,0,0);
+              const reportDate = new Date(parsedDate);
+              reportDate.setHours(0,0,0,0);
+              delay = Math.floor((today - reportDate) / (1000 * 60 * 60 * 24));
+              if (delay < 0) delay = 0;
+            }
+
+            // قراءة الحالة من الملف الخام (إن وجدت) أو استخدام الافتراضية
+            const rawStatus = row['حالة البلاغ'] || row['حالة_البلاغ'] || '';
+            let status = proj.الحالة;
+            if (rawStatus.includes('بانتظار')) status = 'بانتظار اعتماد الجهة المتعدية';
+            else if (rawStatus.includes('معالجة') || rawStatus.includes('جاري')) status = 'تحت معالجة المقاول';
+
+            filteredData.push({
+              رقم_البلاغ: idNum,
+              اسم_المشروع: proj.اسم_المشروع,
+              المقاول: proj.المقاول,
+              المدينة: proj.المدينة,
+              الحي: proj.الحي,
+              التاريخ: formattedDate,
+              التأخير: delay,
+              الحالة: status,
+              المدير: proj.المدير
+            });
+          }
+        });
+
+        // التحقق من الأرقام المفقودة
+        const missing = APPROVED_IDS.filter(id => !foundIds.has(id));
+
+        if (filteredData.length === 0) {
+          alert(`❌ لم يتم العثور على أي بلاغ معتمد!\n\nالأرقام المطلوبة:\n${APPROVED_IDS.join(', ')}\n\nتأكد أن عمود "رقم البلاغ" موجود في الملف.`);
+          return;
         }
+
+        // عرض رسالة التصفية
+        const infoBox = document.getElementById('filterInfo');
+        infoBox.style.display = 'block';
+        infoBox.innerHTML = `
+          ✅ <strong>تم التصفية بنجاح:</strong> من أصل <strong>${jsonData.length}</strong> سجل في الملف الخام → 
+          تم استخراج <strong>${filteredData.length}</strong> بلاغاً خاصاً بالمشاريع الجارية المعتمدة.
+          ${missing.length > 0 ? `<br>⚠️ <strong>ملاحظة:</strong> ${missing.length} بلاغ معتمد غير موجود في هذا الملف: ${missing.join(', ')}` : ''}
+        `;
+
+        currentData = filteredData;
+        renderTable(currentData);
+        updateStats(currentData);
+
+      } catch (err) {
+        console.error('خطأ:', err);
+        alert('❌ خطأ في قراءة الملف: ' + err.message);
       }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ==========================================================
+  // 🛠️ دوال مساعدة للتواريخ
+  // ==========================================================
+  function parseExcelDate(value) {
+    if (!value) return null;
+    
+    // رقم Excel serial
+    if (typeof value === 'number') {
+      const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+      return new Date(excelEpoch.getTime() + value * 86400000);
+    }
+    
+    if (typeof value === 'string') {
+      // صيغة M/D/YY H:MM
+      const match = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+      if (match) {
+        const month = parseInt(match[1]) - 1;
+        const day = parseInt(match[2]);
+        let year = parseInt(match[3]);
+        if (year < 100) year += 2000;
+        return new Date(year, month, day);
+      }
+      
+      // صيغة ISO
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) return d;
+    }
+    
+    return null;
+  }
+
+  function formatDate(date) {
+    if (!date) return '-';
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // ==========================================================
+  // 📊 عرض الجدول والإحصائيات
+  // ==========================================================
+  function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" class="no-data">لا توجد بيانات للعرض</td></tr>';
+      return;
+    }
+
+    // ترتيب حسب التأخير (الأطول أولاً)
+    const sorted = [...data].sort((a, b) => (b.التأخير || 0) - (a.التأخير || 0));
+
+    tbody.innerHTML = sorted.map(row => {
+      const delay = row.التأخير || 0;
+      let delayClass = 'delay-low';
+      if (delay > 120) delayClass = 'delay-high';
+      else if (delay > 60) delayClass = 'delay-medium';
+
+      let statusClass = 'badge-success';
+      if (row.الحالة && row.الحالة.includes('بانتظار')) statusClass = 'badge-warning';
+      else if (row.الحالة && row.الحالة.includes('معاد')) statusClass = 'badge-danger';
+
+      return `
+        <tr data-search="${row.رقم_البلاغ} ${row.اسم_المشروع} ${row.المقاول} ${row.الحي} ${row.المدينة} ${row.المدير}">
+          <td><strong>${row.رقم_البلاغ}</strong></td>
+          <td title="${row.اسم_المشروع}">${row.اسم_المشروع}</td>
+          <td>${row.المقاول}</td>
+          <td>${row.المدينة}</td>
+          <td>${row.الحي}</td>
+          <td>${row.التاريخ}</td>
+          <td class="delay-cell ${delayClass}">${delay} يوم</td>
+          <td><span class="badge ${statusClass}">${row.الحالة}</span></td>
+          <td>${row.المدير}</td>
+          <td class="actions">
+            <button class="action-btn" title="عرض" onclick="viewReport(${row.رقم_البلاغ})">✅</button>
+            <button class="action-btn" title="تعديل" onclick="editReport(${row.رقم_البلاغ})">✏️</button>
+            <button class="action-btn delete" title="حذف" onclick="deleteReport(${row.رقم_البلاغ})">🗑️</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function updateStats(data) {
+    const total = data.length;
+    const processing = data.filter(r => r.الحالة && r.الحالة.includes('معالجة')).length;
+    const pending = data.filter(r => r.الحالة && r.الحالة.includes('بانتظار')).length;
+    const avgDelay = total > 0 ? Math.round(data.reduce((s, r) => s + (r.التأخير || 0), 0) / total) : 0;
+    const critical = data.filter(r => (r.التأخير || 0) > 60).length;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statProcessing').textContent = processing;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statAvgDelay').textContent = avgDelay;
+    document.getElementById('statCritical').textContent = critical;
+  }
+
+  // ==========================================================
+  // 🔍 البحث والتصفية
+  // ==========================================================
+  function filterTable() {
+    const query = document.getElementById('searchBox').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#tableBody tr');
+    
+    rows.forEach(row => {
+      const searchText = row.getAttribute('data-search') || '';
+      row.style.display = searchText.toLowerCase().includes(query) ? '' : 'none';
     });
-  </script>
+  }
+
+  // ==========================================================
+  // 📤 التصدير إلى Excel
+  // ==========================================================
+  function exportToExcel() {
+    if (currentData.length === 0) {
+      alert('لا توجد بيانات للتصدير');
+      return;
+    }
+
+    const exportData = currentData.map(r => ({
+      'رقم البلاغ': r.رقم_البلاغ,
+      'اسم المشروع': r.اسم_المشروع,
+      'المقاول المنفذ': r.المقاول,
+      'المدينة': r.المدينة,
+      'الحي': r.الحي,
+      'تاريخ البلاغ': r.التاريخ,
+      'أيام التأخير': r.التأخير,
+      'حالة البلاغ': r.الحالة,
+      'مدير البرنامج': r.المدير
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'البلاغات');
+    XLSX.writeFile(wb, `تقرير_البلاغات_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }
+
+  // ==========================================================
+  // ⚙️ إجراءات الصف
+  // ==========================================================
+  function viewReport(id) {
+    const report = currentData.find(r => r.رقم_البلاغ === id);
+    if (report) {
+      alert(`📋 تفاصيل البلاغ رقم ${id}\n\nالمشروع: ${report.اسم_المشروع}\nالمقاول: ${report.المقاول}\nالموقع: ${report.المدينة} - ${report.الحي}\nالتأخير: ${report.التأخير} يوم\nالحالة: ${report.الحالة}\nالمدير: ${report.المدير}`);
+    }
+  }
+
+  function editReport(id) {
+    alert(`✏️ ميزة التعديل قيد التطوير\nرقم البلاغ: ${id}`);
+  }
+
+  function deleteReport(id) {
+    if (confirm(`هل أنت متأكد من حذف البلاغ رقم ${id}؟`)) {
+      currentData = currentData.filter(r => r.رقم_البلاغ !== id);
+      renderTable(currentData);
+      updateStats(currentData);
+    }
+  }
+</script>
+
 </body>
 </html>
